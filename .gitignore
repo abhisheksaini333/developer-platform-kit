@@ -1,0 +1,14 @@
+node_modules/
+.tools/
+.runtime/
+.validation/
+dist/
+build/
+coverage/
+.env
+*.sqlite
+*.sqlite-*
+**/bin/
+**/obj/
+.generated/
+.DS_Store
