@@ -10,3 +10,12 @@ exports['rejects unowned or invalid service entities'] = () => {
  assert.deepStrictEqual(validateCatalog(entities), []);
  assert(validateCatalog([{kind:'Component',metadata:{name:'../bad'},spec:{}}]).length >= 3);
 };
+
+exports['rejects dangling dependencies and dependency cycles'] = () => {
+ const {validateCatalog} = require('../src/catalog');
+ const a=JSON.parse(JSON.stringify(entities));
+ a[4].spec.dependsOn=['component:default/platform-portal'];
+ assert(validateCatalog(a).some(e=>e.includes('cycle')));
+ a[4].spec.dependsOn=['component:default/missing'];
+ assert(validateCatalog(a).some(e=>e.includes('Unknown dependency')));
+};

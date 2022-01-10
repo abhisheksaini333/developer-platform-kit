@@ -16,6 +16,19 @@ function validateCatalog(entities) {
     }
   }
   for (const e of entities) if (e.spec && e.spec.owner && !refs.has(e.spec.owner)) errors.push(`${e.metadata.name}: unknown owner ${e.spec.owner}`);
+  const graph = new Map(entities.map(e=>[entityRef(e), (e.spec && e.spec.dependsOn) || []]));
+  const visited = new Set(), active = new Set();
+  function visit(ref) {
+    if(active.has(ref)) { errors.push(`Dependency cycle at ${ref}`); return; }
+    if(visited.has(ref)) return;
+    visited.add(ref); active.add(ref);
+    for(const dependency of graph.get(ref) || []) {
+      if(!graph.has(dependency)) errors.push(`Unknown dependency ${dependency}`);
+      else visit(dependency);
+    }
+    active.delete(ref);
+  }
+  for(const ref of graph.keys()) visit(ref);
   return errors;
 }
 module.exports = {validateCatalog, entityRef, NAME};
