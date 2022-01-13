@@ -11,7 +11,16 @@ function validateInput(input) {
  return errors;
 }
 function render(input) {
- return {'README.md':`# ${input.name}\n\nOwned by ${input.owner}.\n`};
+ const files={'README.md':`# ${input.name}\n\nOwned by ${input.owner}.\n\nRun npm install, npm run build and npm start.\n`};
+ const base=path.join(__dirname,'../templates',input.language);
+ function walk(dir) {
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})) {
+   const file=path.join(dir,entry.name);
+   if(entry.isDirectory()) walk(file);
+   else files[path.relative(base,file)]=fs.readFileSync(file,'utf8').replace(/__NAME__/g,input.name).replace(/__OWNER__/g,input.owner);
+  }
+ }
+ walk(base); return files;
 }
 function generate(input, destination) {
  const errors=validateInput(input); if(errors.length) throw new Error(errors.join('; '));

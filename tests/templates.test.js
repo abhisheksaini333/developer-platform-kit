@@ -19,3 +19,9 @@ exports['generator creates a fresh project and refuses overwrite'] = () => {
   assert.throws(()=>generate({name:'orders',owner:'platform-team',language:'node'},target),/exists/);
  } finally {fs.rmSync(dir,{recursive:true,force:true});}
 };
+
+exports['node template includes a runnable TypeScript health service'] = () => {
+ const files=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
+ assert(files['src/server.ts'].includes('createServer'));
+ assert(files['package.json'].includes('orders'));
+};
