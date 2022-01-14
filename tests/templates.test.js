@@ -25,3 +25,9 @@ exports['node template includes a runnable TypeScript health service'] = () => {
  assert(files['src/server.ts'].includes('createServer'));
  assert(files['package.json'].includes('orders'));
 };
+
+exports['node template validates submitted work items'] = () => {
+ const files=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
+ assert(files['src/items.ts']);
+ assert(files['src/server.ts'].includes('/items'));
+};
