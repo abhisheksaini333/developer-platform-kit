@@ -31,3 +31,8 @@ exports['node template validates submitted work items'] = () => {
  assert(files['src/items.ts']);
  assert(files['src/server.ts'].includes('/items'));
 };
+
+exports['generated Node project carries executable behavior tests'] = () => {
+ const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
+ assert(JSON.parse(f['package.json']).scripts.test);assert(f['tests/api.js'].includes('422'));
+};
