@@ -4,6 +4,7 @@ export function createServer() {
  const items:Item[]=[];
  return http.createServer(async (req: IncomingMessage,res: ServerResponse) => {
   res.setHeader('Content-Type','application/json');
+  if(req.method==='GET' && req.url==='/openapi.json') {res.end(JSON.stringify(require('../openapi.json')));return;}
   if(req.method==='GET' && req.url==='/health') {res.end(JSON.stringify({status:'ok',service:'__NAME__'}));return;}
   if(req.url==='/items' && req.method==='GET') {res.end(JSON.stringify(items));return;}
   if(req.url==='/items' && req.method==='POST') {

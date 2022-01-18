@@ -36,3 +36,8 @@ exports['generated Node project carries executable behavior tests'] = () => {
  const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
  assert(JSON.parse(f['package.json']).scripts.test);assert(f['tests/api.js'].includes('422'));
 };
+
+exports['generated API includes an OpenAPI discovery endpoint'] = () => {
+ const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
+ const spec=JSON.parse(f['openapi.json']);assert(spec.paths['/items'].post);assert(f['src/server.ts'].includes('/openapi.json'));
+};
