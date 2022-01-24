@@ -1,8 +1,12 @@
 import http, { IncomingMessage, ServerResponse } from 'http';
+import {randomUUID} from 'crypto';
 import {Item,validateItem} from './items';
 export function createServer() {
  const items:Item[]=[];
  return http.createServer(async (req: IncomingMessage,res: ServerResponse) => {
+  const started=process.hrtime.bigint(),requestId=randomUUID();
+  res.setHeader('X-Request-Id',requestId);
+  res.on('finish',()=>console.log(JSON.stringify({requestId,method:req.method,path:(req.url || '').split('?')[0],status:res.statusCode,durationMs:Number(process.hrtime.bigint()-started)/1e6})));
   res.setHeader('Content-Type','application/json');
   if(req.method==='GET' && req.url==='/openapi.json') {res.end(JSON.stringify(require('../openapi.json')));return;}
   if(req.method==='GET' && req.url==='/health') {res.end(JSON.stringify({status:'ok',service:'__NAME__'}));return;}
