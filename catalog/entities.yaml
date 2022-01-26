@@ -1,0 +1,82 @@
+{
+  "apiVersion": "backstage.io/v1alpha1",
+  "kind": "Group",
+  "metadata": {
+    "name": "platform-team",
+    "description": "Developer experience and service delivery"
+  },
+  "spec": {
+    "type": "team",
+    "profile": {
+      "displayName": "Platform engineering"
+    },
+    "children": []
+  }
+}
+---
+{
+  "apiVersion": "backstage.io/v1alpha1",
+  "kind": "User",
+  "metadata": {
+    "name": "developer"
+  },
+  "spec": {
+    "profile": {
+      "displayName": "Local developer"
+    },
+    "memberOf": [
+      "platform-team"
+    ]
+  }
+}
+---
+{
+  "apiVersion": "backstage.io/v1alpha1",
+  "kind": "System",
+  "metadata": {
+    "name": "delivery-platform",
+    "description": "Service discovery, creation and delivery"
+  },
+  "spec": {
+    "owner": "group:default/platform-team"
+  }
+}
+---
+{
+  "apiVersion": "backstage.io/v1alpha1",
+  "kind": "Component",
+  "metadata": {
+    "name": "platform-portal",
+    "description": "Catalog and service delivery workspace",
+    "annotations": {
+      "platform-kit/docs": "docs/onboarding.md"
+    }
+  },
+  "spec": {
+    "type": "website",
+    "lifecycle": "production",
+    "owner": "group:default/platform-team",
+    "system": "delivery-platform",
+    "dependsOn": [
+      "component:default/platform-api"
+    ]
+  }
+}
+---
+{
+  "apiVersion": "backstage.io/v1alpha1",
+  "kind": "Component",
+  "metadata": {
+    "name": "platform-api",
+    "description": "Catalog and provisioning API",
+    "annotations": {
+      "platform-kit/docs": "docs/api.md"
+    }
+  },
+  "spec": {
+    "type": "service",
+    "lifecycle": "production",
+    "owner": "group:default/platform-team",
+    "system": "delivery-platform"
+  }
+}

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node tests/run.js",
-    "build": "node scripts/build.js"
+    "build": "node scripts/build.js",
+    "start": "node src/server.js"
   },
   "license": "Apache-2.0",
   "dependencies": {
