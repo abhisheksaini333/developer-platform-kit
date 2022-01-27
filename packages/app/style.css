@@ -12,3 +12,5 @@ body {margin:0;} * {box-sizing:border-box;}
 .rail-note {position:absolute;bottom:30px;color:#a3b6a8;font-size:13px;line-height:1.6;}
 main {min-width:0;}
 @media(max-width:760px){.workspace{grid-template-columns:1fr}.rail{height:auto;position:static;padding:18px}.rail-label,.rail-note{display:none}.rail nav{display:flex;flex-wrap:wrap}.brand{font-size:34px}}
+
+.entity-grid {padding:24px;display:grid;gap:24px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
