@@ -5,6 +5,9 @@ async function start(port=Number(process.env.PORT||4600)) {
  const app=express();
  app.disable('x-powered-by');
  app.get('/health',(_req,res)=>res.json({status:'ok'}));
+ const docs=require('./docs');
+ app.get('/api/docs',(_req,res)=>res.json(docs.listDocuments()));
+ app.get('/api/docs/:id',(req,res)=>{try{res.json(docs.readDocument(req.params.id));}catch{res.status(404).json({error:'Document not found'});}});
  const catalog=await createCatalog();
  app.use('/api/catalog',catalog.router);
  app.use(express.static(path.join(__dirname,'../dist')));
