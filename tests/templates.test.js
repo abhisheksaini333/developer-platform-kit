@@ -46,3 +46,8 @@ exports['Node API emits structured request diagnostics'] = () => {
  const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
  assert(f['src/server.ts'].includes('durationMs'));assert(f['src/server.ts'].includes('requestId'));
 };
+
+exports['CLI rejects invalid input without creating a target'] = () => {
+ const r=require('child_process').spawnSync(process.execPath,[require('path').join(__dirname,'../scripts/generate.js'),'--name','../bad','--owner','platform-team','--language','node','--destination','/tmp/invalid-platform'],{encoding:'utf8'});
+ assert.strictEqual(r.status,2);assert(r.stderr.includes('Name'));
+};
