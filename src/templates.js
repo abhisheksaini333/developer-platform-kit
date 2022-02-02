@@ -20,7 +20,7 @@ function render(input) {
    else files[path.relative(base,file)]=fs.readFileSync(file,'utf8').replace(/__NAME__/g,input.name).replace(/__OWNER__/g,input.owner);
   }
  }
- walk(base); return files;
+ walk(base); files['.platform-template.json']=JSON.stringify({template:input.language,version:'1.0.0',inputs:{name:input.name,owner:input.owner,language:input.language}},null,2)+'\n'; return files;
 }
 function generate(input, destination) {
  const errors=validateInput(input); if(errors.length) throw new Error(errors.join('; '));

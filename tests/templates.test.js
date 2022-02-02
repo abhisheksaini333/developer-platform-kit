@@ -51,3 +51,8 @@ exports['CLI rejects invalid input without creating a target'] = () => {
  const r=require('child_process').spawnSync(process.execPath,[require('path').join(__dirname,'../scripts/generate.js'),'--name','../bad','--owner','platform-team','--language','node','--destination','/tmp/invalid-platform'],{encoding:'utf8'});
  assert.strictEqual(r.status,2);assert(r.stderr.includes('Name'));
 };
+
+exports['generated projects record template provenance'] = () => {
+ const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
+ const m=JSON.parse(f['.platform-template.json']);assert.strictEqual(m.template,'node');assert.strictEqual(m.version,'1.0.0');assert.strictEqual(m.inputs.name,'orders');
+};
