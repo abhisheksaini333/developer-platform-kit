@@ -56,3 +56,8 @@ exports['generated projects record template provenance'] = () => {
  const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
  const m=JSON.parse(f['.platform-template.json']);assert.strictEqual(m.template,'node');assert.strictEqual(m.version,'1.0.0');assert.strictEqual(m.inputs.name,'orders');
 };
+
+exports['generated service catalog entity carries explicit ownership'] = () => {
+ const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
+ const e=JSON.parse(f['catalog-info.yaml']);assert.strictEqual(e.spec.owner,'group:default/platform-team');assert.strictEqual(e.spec.type,'service');
+};
