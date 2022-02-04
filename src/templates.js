@@ -25,6 +25,7 @@ function render(input) {
 function generate(input, destination) {
  const errors=validateInput(input); if(errors.length) throw new Error(errors.join('; '));
  const target=path.resolve(destination);
+ let ancestor=path.dirname(target);while(ancestor!==path.dirname(ancestor)){if(fs.lstatSync(ancestor).isSymbolicLink() && !['/var','/tmp','/etc'].includes(ancestor))throw new Error('Destination must not contain a symlink');ancestor=path.dirname(ancestor);}
  if(fs.existsSync(target)) throw new Error('Destination already exists');
  const staging=fs.mkdtempSync(path.join(path.dirname(target), '.platform-'));
  try {

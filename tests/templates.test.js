@@ -65,3 +65,7 @@ exports['generated service catalog entity carries explicit ownership'] = () => {
 exports['preview returns generated files without filesystem side effects'] = () => {
  const {preview}=require('../src/templates');const result=preview({name:'orders',owner:'platform-team',language:'node'});assert(result.files.includes('src/server.ts'));assert(result.bytes>500);assert.throws(()=>preview({}),/Name/);
 };
+
+exports['generator rejects symlinked destination parents'] = () => {
+ const d=fs.mkdtempSync(path.join(os.tmpdir(),'platform-'));try{fs.mkdirSync(path.join(d,'real'));fs.symlinkSync(path.join(d,'real'),path.join(d,'alias'));assert.throws(()=>require('../src/templates').generate({name:'orders',owner:'platform-team',language:'node'},path.join(d,'alias','orders')),/symlink/);}finally{fs.rmSync(d,{recursive:true,force:true});}
+};
