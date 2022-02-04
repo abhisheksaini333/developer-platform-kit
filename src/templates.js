@@ -35,4 +35,5 @@ function generate(input, destination) {
  } catch(error) { fs.rmSync(staging,{recursive:true,force:true}); throw error; }
  return {name:input.name,path:target};
 }
-module.exports={validateInput,render,generate};
+function preview(input) {const errors=validateInput(input);if(errors.length) throw new Error(errors.join('; '));const files=render(input);return {name:input.name,language:input.language,files:Object.keys(files).sort(),bytes:Object.values(files).reduce((n,x)=>n+Buffer.byteLength(x),0)};}
+module.exports={validateInput,render,generate,preview};

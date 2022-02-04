@@ -61,3 +61,7 @@ exports['generated service catalog entity carries explicit ownership'] = () => {
  const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
  const e=JSON.parse(f['catalog-info.yaml']);assert.strictEqual(e.spec.owner,'group:default/platform-team');assert.strictEqual(e.spec.type,'service');
 };
+
+exports['preview returns generated files without filesystem side effects'] = () => {
+ const {preview}=require('../src/templates');const result=preview({name:'orders',owner:'platform-team',language:'node'});assert(result.files.includes('src/server.ts'));assert(result.bytes>500);assert.throws(()=>preview({}),/Name/);
+};
