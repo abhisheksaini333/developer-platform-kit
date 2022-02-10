@@ -9,6 +9,7 @@ export function createServer() {
   res.on('finish',()=>console.log(JSON.stringify({requestId,method:req.method,path:(req.url || '').split('?')[0],status:res.statusCode,durationMs:Number(process.hrtime.bigint()-started)/1e6})));
   res.setHeader('Content-Type','application/json');
   if(req.method==='GET' && req.url==='/openapi.json') {res.end(JSON.stringify(require('../openapi.json')));return;}
+  if(req.method==='GET' && req.url==='/ready') {const ready=process.env.READY!=='false';res.statusCode=ready?200:503;res.end(JSON.stringify({status:ready?'ready':'unavailable'}));return;}
   if(req.method==='GET' && req.url==='/health') {res.end(JSON.stringify({status:'ok',service:'__NAME__'}));return;}
   if(req.url==='/items' && req.method==='GET') {res.end(JSON.stringify(items));return;}
   if(req.url==='/items' && req.method==='POST') {
