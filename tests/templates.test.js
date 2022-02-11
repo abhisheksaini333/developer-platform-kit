@@ -69,3 +69,7 @@ exports['preview returns generated files without filesystem side effects'] = () 
 exports['generator rejects symlinked destination parents'] = () => {
  const d=fs.mkdtempSync(path.join(os.tmpdir(),'platform-'));try{fs.mkdirSync(path.join(d,'real'));fs.symlinkSync(path.join(d,'real'),path.join(d,'alias'));assert.throws(()=>require('../src/templates').generate({name:'orders',owner:'platform-team',language:'node'},path.join(d,'alias','orders')),/symlink/);}finally{fs.rmSync(d,{recursive:true,force:true});}
 };
+
+exports['Node service supports draining and bounded graceful shutdown'] = () => {
+ const text=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'})['src/server.ts'];assert(text.includes('SIGTERM'));assert(text.includes('draining'));
+};
