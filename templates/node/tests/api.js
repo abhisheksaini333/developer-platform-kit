@@ -18,6 +18,7 @@ server.listen(0,'127.0.0.1',async()=>{
   assert.strictEqual((await request(port,'/items')).body.length,1);
   assert.strictEqual((await request(port,'/missing')).status,404);
   assert.strictEqual((await request(port,'/ready')).body.status,'ready');
+  assert.strictEqual((await request(port,'/items','POST',{title:'x'.repeat(70000)})).status,413);
   console.log('Generated service API checks passed');
  } catch(error) {console.error(error);process.exitCode=1;}finally{server.close();}
 });
