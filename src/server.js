@@ -4,6 +4,8 @@ const {createCatalog}=require('./backstage');
 async function start(port=Number(process.env.PORT||4600),options={}) {
  const app=express();app.disable('x-powered-by');app.use(express.json({limit:'64kb'}));
  app.get('/health',(_req,res)=>res.json({status:'ok'}));
+ const templates=require('./templates');
+ app.post('/api/templates/preview',(req,res)=>{try{res.json(templates.preview(req.body));}catch(error){res.status(422).json({error:error.message});}});
  const docs=require('./docs');
  app.get('/api/docs',(_req,res)=>res.json(docs.listDocuments()));
  app.get('/api/docs/:id',(req,res)=>{try{res.json(docs.readDocument(req.params.id));}catch{res.status(404).json({error:'Document not found'});}});
