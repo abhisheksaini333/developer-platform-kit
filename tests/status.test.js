@@ -1,0 +1,3 @@
+const assert=require('assert'),http=require('http');
+async function fixture(handler,fn){const s=http.createServer(handler);await new Promise(r=>s.listen(0,'127.0.0.1',r));try{return await fn('http://127.0.0.1:'+s.address().port);}finally{await new Promise(r=>s.close(r));}}
+exports['probe reports actual HTTP readiness and bounds stalled requests'] = async()=>{const {probe}=require('../src/status');await fixture((_q,r)=>{r.setHeader('content-type','application/json');r.end(JSON.stringify({status:'ready'}));},async url=>{assert.strictEqual((await probe(url)).state,'ready')});await fixture((_q,_r)=>{},async url=>{const t=Date.now();assert.strictEqual((await probe(url,{timeoutMs:80})).state,'unavailable');assert(Date.now()-t<800)});};
