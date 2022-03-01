@@ -8,6 +8,9 @@ async function start(port=Number(process.env.PORT||4600),options={}) {
  const workspace=options.workspace||path.join(__dirname,'../.generated/services');fs.mkdirSync(workspace,{recursive:true});
  app.post('/api/templates/generate',(req,res)=>{const errors=templates.validateInput(req.body);if(errors.length)return res.status(422).json({error:errors.join('; ')});try{const result=templates.generate(req.body,path.join(workspace,req.body.name));res.status(201).json({name:result.name,commands:['cd '+result.path,'npm install','npm test','npm start']});}catch(error){res.status(error.message.includes('exists')?409:422).json({error:error.message});}});
  app.post('/api/templates/preview',(req,res)=>{try{res.json(templates.preview(req.body));}catch(error){res.status(422).json({error:error.message});}});
+ const status=require('./status');
+ const services=options.services||[{name:'sample-service',url:process.env.SERVICE_URL||'http://127.0.0.1:4605/ready'}];
+ app.get('/api/status',async(_req,res,next)=>{try{const observations=await Promise.all(services.map(async service=>({name:service.name,...await status.probe(service.url)})));res.json({services:observations});}catch(error){next(error);}});
  const docs=require('./docs');
  app.get('/api/docs',(_req,res)=>res.json(docs.listDocuments()));
  app.get('/api/docs/:id',(req,res)=>{try{res.json(docs.readDocument(req.params.id));}catch{res.status(404).json({error:'Document not found'});}});
