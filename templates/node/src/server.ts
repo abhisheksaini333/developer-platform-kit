@@ -24,7 +24,7 @@ export function createServer() {
  (server as any).drain=()=>{draining=true;};return server;
 }
 if(require.main===module) {
- const server=createServer();server.listen(Number(process.env.PORT || 4605),'0.0.0.0');
+ const server=createServer();server.listen(Number(process.env.PORT || __PORT__),'0.0.0.0');
  const stop=()=>{(server as any).drain();server.close(()=>process.exit(0));setTimeout(()=>process.exit(1),10000).unref();};
  process.once('SIGTERM',stop);process.once('SIGINT',stop);
 }

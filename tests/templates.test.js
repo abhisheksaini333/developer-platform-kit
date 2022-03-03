@@ -73,3 +73,5 @@ exports['generator rejects symlinked destination parents'] = () => {
 exports['Node service supports draining and bounded graceful shutdown'] = () => {
  const text=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'})['src/server.ts'];assert(text.includes('SIGTERM'));assert(text.includes('draining'));
 };
+
+exports['template ports are valid TCP ports and reach the generated runtime'] = () => {const t=require('../src/templates');for(const port of [-1,0,65536,'oops',4.5])assert(t.validateInput({name:'orders',owner:'platform-team',language:'node',port}).length);assert(t.render({name:'orders',owner:'platform-team',language:'node',port:4620})['src/server.ts'].includes('4620'));};
