@@ -4,7 +4,7 @@ import {Item,validateItem} from './items';
 export function createServer() {
  const items:Item[]=[];let draining=false;
  const server=http.createServer(async (req: IncomingMessage,res: ServerResponse) => {
-  const started=process.hrtime.bigint(),requestId=randomUUID();
+  const started=process.hrtime.bigint(),requestId=typeof req.headers['x-request-id']==='string' && /^[A-Za-z0-9._-]{1,100}$/.test(req.headers['x-request-id'])?req.headers['x-request-id']:randomUUID();
   res.setHeader('X-Request-Id',requestId);
   res.on('finish',()=>console.log(JSON.stringify({requestId,method:req.method,path:(req.url || '').split('?')[0],status:res.statusCode,durationMs:Number(process.hrtime.bigint()-started)/1e6})));
   res.setHeader('Content-Type','application/json');
