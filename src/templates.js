@@ -21,7 +21,7 @@ function render(input) {
    else files[path.relative(base,file)]=fs.readFileSync(file,'utf8').replace(/__NAME__/g,input.name).replace(/__OWNER__/g,input.owner).replace(/__PORT__/g,String(input.port||4605));
   }
  }
- walk(base); files['catalog-info.yaml']=JSON.stringify({apiVersion:'backstage.io/v1alpha1',kind:'Component',metadata:{name:input.name,annotations:{'platform-kit/template':input.language}},spec:{type:'service',lifecycle:'experimental',owner:'group:default/'+input.owner}},null,2)+'\n'; files['.platform-template.json']=JSON.stringify({template:input.language,version:'1.0.0',inputs:{name:input.name,owner:input.owner,language:input.language,port:Number(input.port||4605)}},null,2)+'\n'; return files;
+ walk(base); files['catalog-info.yaml']=JSON.stringify({apiVersion:'backstage.io/v1alpha1',kind:'Component',metadata:{name:input.name,annotations:{'platform-kit/template':input.language}},spec:{type:'service',lifecycle:'experimental',owner:'group:default/'+input.owner}},null,2)+'\n'; files['.platform-template.json']=JSON.stringify({template:input.language,version:'1.0.0',inputs:{name:input.name,owner:input.owner,language:input.language,port:Number(input.port||4605)},files:Object.fromEntries(Object.entries(files).map(([name,content])=>[name,require('crypto').createHash('sha256').update(content).digest('hex')]))},null,2)+'\n'; return files;
 }
 function generate(input, destination) {
  const errors=validateInput(input); if(errors.length) throw new Error(errors.join('; '));

@@ -75,3 +75,5 @@ exports['Node service supports draining and bounded graceful shutdown'] = () => 
 };
 
 exports['template ports are valid TCP ports and reach the generated runtime'] = () => {const t=require('../src/templates');for(const port of [-1,0,65536,'oops',4.5])assert(t.validateInput({name:'orders',owner:'platform-team',language:'node',port}).length);assert(t.render({name:'orders',owner:'platform-team',language:'node',port:4620})['src/server.ts'].includes('4620'));};
+
+exports['template provenance records per-file integrity'] = () => {const crypto=require('crypto');const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});const m=JSON.parse(f['.platform-template.json']);assert.strictEqual(m.files['src/server.ts'],crypto.createHash('sha256').update(f['src/server.ts']).digest('hex'));};
