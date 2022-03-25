@@ -8,11 +8,11 @@ function validateInput(input) {
  if(!NAME.test(input.name || '')) errors.push('Name must be a lowercase DNS label');
  if(!NAME.test(input.owner || '')) errors.push('Owner must be a catalog group name');
  if(input.port!==undefined && (!Number.isInteger(Number(input.port)) || Number(input.port)<1 || Number(input.port)>65535)) errors.push('Port must be an integer from 1 to 65535');
- if(!['node'].includes(input.language)) errors.push('Language must be node');
+ if(!['node','dotnet'].includes(input.language)) errors.push('Language must be node or dotnet');
  return errors;
 }
 function render(input) {
- const files={'README.md':`# ${input.name}\n\nOwned by ${input.owner}.\n\nRun npm install, npm run build and npm start.\n`};
+ const files={'README.md':`# ${input.name}\n\nOwned by ${input.owner}.\n\nRun ${input.language==='dotnet'?'dotnet build and dotnet run':'npm install, npm run build and npm start'}.\n`};
  const base=path.join(__dirname,'../templates',input.language);
  function walk(dir) {
   for(const entry of fs.readdirSync(dir,{withFileTypes:true})) {
