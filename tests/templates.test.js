@@ -83,3 +83,5 @@ exports['CLI JSON output is machine-readable and excludes secrets'] = () => {con
 exports['ASP.NET template creates a pinned .NET 6 web project'] = () => {const t=require('../src/templates');assert.deepStrictEqual(t.validateInput({name:'orders',owner:'platform-team',language:'dotnet'}),[]);const f=t.render({name:'orders',owner:'platform-team',language:'dotnet'});assert(f['Service.csproj'].includes('net6.0'));assert(f['README.md'].includes('dotnet'));};
 
 exports['ASP.NET services separate health and readiness'] = () => {const text=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'})['ServiceFactory.cs'];assert(text.includes('/health'));assert(text.includes('/ready'));assert(text.includes('503'));};
+
+exports['ASP.NET work item API validates input and bounds request bodies'] = () => {const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'});assert(f['ServiceFactory.cs'].includes('422'));assert(f['ServiceFactory.cs'].includes('MaxRequestBodySize'));assert(f['WorkItem.cs']);};
