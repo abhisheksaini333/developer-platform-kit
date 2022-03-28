@@ -18,6 +18,7 @@ public static class ServiceFactory
             items[item.Id] = item;
             return Results.Created($"/items/{item.Id}", item);
         });
+        app.MapGet("/openapi.json", () => Results.Content(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "openapi.json")), "application/json"));
         return app;
     }
 }

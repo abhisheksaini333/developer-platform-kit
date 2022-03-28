@@ -85,3 +85,5 @@ exports['ASP.NET template creates a pinned .NET 6 web project'] = () => {const t
 exports['ASP.NET services separate health and readiness'] = () => {const text=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'})['ServiceFactory.cs'];assert(text.includes('/health'));assert(text.includes('/ready'));assert(text.includes('503'));};
 
 exports['ASP.NET work item API validates input and bounds request bodies'] = () => {const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'});assert(f['ServiceFactory.cs'].includes('422'));assert(f['ServiceFactory.cs'].includes('MaxRequestBodySize'));assert(f['WorkItem.cs']);};
+
+exports['ASP.NET services expose an OpenAPI document'] = () => {const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'});assert(JSON.parse(f['openapi.json']).paths['/items']);assert(f['ServiceFactory.cs'].includes('/openapi.json'));};

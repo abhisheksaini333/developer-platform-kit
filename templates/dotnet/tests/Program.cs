@@ -17,6 +17,7 @@ try
     Check((await client.PostAsJsonAsync("/items", new { title = "Review deployment" })).StatusCode == HttpStatusCode.Created, "Create item");
     Check((await client.GetFromJsonAsync<WorkItem[]>("/items"))!.Length == 1, "Read items");
     Check((await client.GetAsync("/missing")).StatusCode == HttpStatusCode.NotFound, "Unknown route");
-    Console.WriteLine("6 actual ASP.NET HTTP assertions passed");
+    Check((await client.GetStringAsync("/openapi.json")).Contains("openapi"), "OpenAPI document");
+    Console.WriteLine("7 actual ASP.NET HTTP assertions passed");
 }
 finally { await app.StopAsync(); await app.DisposeAsync(); }
