@@ -1,0 +1,18 @@
+name: Verify service
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.201'
+      - run: dotnet build Service.csproj -c Release
+      - run: dotnet run --project tests/Smoke.csproj -c Release
+      - uses: actions/upload-artifact@v2
+        with:
+          name: service-build
+          path: bin/Release/net6.0/
