@@ -59,7 +59,7 @@ exports['generated projects record template provenance'] = () => {
 
 exports['generated service catalog entity carries explicit ownership'] = () => {
  const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
- const e=JSON.parse(f['catalog-info.yaml']);assert.strictEqual(e.spec.owner,'group:default/platform-team');assert.strictEqual(e.spec.type,'service');
+ const e=require('yaml').parseAllDocuments(f['catalog-info.yaml'])[0].toJSON();assert.strictEqual(e.spec.owner,'group:default/platform-team');assert.strictEqual(e.spec.type,'service');
 };
 
 exports['preview returns generated files without filesystem side effects'] = () => {
@@ -87,3 +87,5 @@ exports['ASP.NET services separate health and readiness'] = () => {const text=re
 exports['ASP.NET work item API validates input and bounds request bodies'] = () => {const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'});assert(f['ServiceFactory.cs'].includes('422'));assert(f['ServiceFactory.cs'].includes('MaxRequestBodySize'));assert(f['WorkItem.cs']);};
 
 exports['ASP.NET services expose an OpenAPI document'] = () => {const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'});assert(JSON.parse(f['openapi.json']).paths['/items']);assert(f['ServiceFactory.cs'].includes('/openapi.json'));};
+
+exports['generated service catalog includes its API relationship and definition'] = () => {const yaml=require('yaml');const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'dotnet'});const entities=yaml.parseAllDocuments(f['catalog-info.yaml']).map(d=>d.toJSON());assert.strictEqual(entities.length,2);assert.strictEqual(entities[0].spec.providesApis[0],'orders-api');assert.strictEqual(entities[1].kind,'API');assert(JSON.parse(entities[1].spec.definition).paths['/items']);};
