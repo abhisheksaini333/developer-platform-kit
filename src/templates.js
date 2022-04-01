@@ -5,6 +5,8 @@ const {NAME} = require('./catalog');
 function validateInput(input) {
  const errors=[];
  if(!input || typeof input !== 'object') return ['Input must be an object'];
+ for(const key of Object.keys(input)) if(!['name','owner','language','port','destination','format'].includes(key)) errors.push('Unknown template option: '+key);
+ if(input.format!==undefined && !['text','json'].includes(input.format))errors.push('Format must be text or json');
  if(!NAME.test(input.name || '')) errors.push('Name must be a lowercase DNS label');
  if(!NAME.test(input.owner || '')) errors.push('Owner must be a catalog group name');
  if(input.port!==undefined && (!Number.isInteger(Number(input.port)) || Number(input.port)<1 || Number(input.port)>65535)) errors.push('Port must be an integer from 1 to 65535');
