@@ -18,6 +18,9 @@ try
     Check((await client.GetFromJsonAsync<WorkItem[]>("/items"))!.Length == 1, "Read items");
     Check((await client.GetAsync("/missing")).StatusCode == HttpStatusCode.NotFound, "Unknown route");
     Check((await client.GetStringAsync("/openapi.json")).Contains("openapi"), "OpenAPI document");
-    Console.WriteLine("7 actual ASP.NET HTTP assertions passed");
+    using var correlated = new HttpRequestMessage(HttpMethod.Get, "/health");
+    correlated.Headers.Add("X-Request-Id", "request-42");
+    Check((await client.SendAsync(correlated)).Headers.GetValues("X-Request-Id").Single() == "request-42", "Correlation ID");
+    Console.WriteLine("8 actual ASP.NET HTTP assertions passed");
 }
 finally { await app.StopAsync(); await app.DisposeAsync(); }

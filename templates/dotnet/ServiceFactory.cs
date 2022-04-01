@@ -7,6 +7,14 @@ public static class ServiceFactory
         var app = builder.Build();
         var items = new System.Collections.Concurrent.ConcurrentDictionary<int, WorkItem>();
         int nextId = 0;
+        app.Use(async (context, next) => {
+            var incoming = context.Request.Headers["X-Request-Id"].ToString();
+            var id = System.Text.RegularExpressions.Regex.IsMatch(incoming, "^[A-Za-z0-9._-]{1,100}$") ? incoming : Guid.NewGuid().ToString("N");
+            context.TraceIdentifier = id;
+            context.Response.Headers["X-Request-Id"] = id;
+            using var scope = app.Logger.BeginScope(new Dictionary<string, object> { ["RequestId"] = id });
+            await next();
+        });
         app.MapGet("/", () => Results.Json(new { service = "__NAME__" }));
         app.MapGet("/health", () => Results.Json(new { status = "ok", service = "__NAME__" }));
         app.MapGet("/ready", () => Environment.GetEnvironmentVariable("READY") == "false" ? Results.Json(new { status = "unavailable" }, statusCode: 503) : Results.Json(new { status = "ready" }));
