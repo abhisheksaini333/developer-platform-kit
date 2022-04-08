@@ -9,4 +9,10 @@ function probe(url,{timeoutMs=1500}={}){
   req.on('error',()=>finish('unavailable','Connection failed'));
  });
 }
-module.exports={probe};
+async function probeAll(services,{concurrency=4,...options}={}){
+ if(!Number.isInteger(concurrency)||concurrency<1||concurrency>20)throw Error('Invalid probe concurrency');
+ const results=new Array(services.length);let cursor=0;
+ async function worker(){while(cursor<services.length){const i=cursor++,service=services[i];results[i]={name:service.name,...await probe(service.url,options)};}}
+ await Promise.all(Array.from({length:Math.min(concurrency,services.length)},worker));return results;
+}
+module.exports={probe,probeAll};
