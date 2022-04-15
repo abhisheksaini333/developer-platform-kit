@@ -15,4 +15,8 @@ async function probeAll(services,{concurrency=4,...options}={}){
  async function worker(){while(cursor<services.length){const i=cursor++,service=services[i];results[i]={name:service.name,...await probe(service.url,options)};}}
  await Promise.all(Array.from({length:Math.min(concurrency,services.length)},worker));return results;
 }
-module.exports={probe,probeAll};
+class StatusStore{
+ constructor(services,{ttlMs=5000,now=Date.now,...options}={}){this.services=services;this.ttlMs=ttlMs;this.now=now;this.options=options;this.cached=null;this.pending=null;this.updated=0;}
+ async read(){if(this.cached&&this.now()-this.updated<this.ttlMs)return this.cached;if(!this.pending)this.pending=probeAll(this.services,this.options).then(values=>{this.cached=values;this.updated=this.now();return values;}).finally(()=>{this.pending=null;});return this.pending;}
+}
+module.exports={probe,probeAll,StatusStore};

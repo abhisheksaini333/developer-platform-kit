@@ -10,7 +10,8 @@ async function start(port=Number(process.env.PORT||4600),options={}) {
  app.post('/api/templates/preview',(req,res)=>{try{res.json(templates.preview(req.body));}catch(error){res.status(422).json({error:error.message});}});
  const status=require('./status');
  const services=options.services||[{name:'sample-service',url:process.env.SERVICE_URL||'http://127.0.0.1:4605/ready'}];
- app.get('/api/status',async(_req,res,next)=>{try{const observations=await status.probeAll(services);res.json({services:observations});}catch(error){next(error);}});
+ const statusStore=new status.StatusStore(services);
+ app.get('/api/status',async(_req,res,next)=>{try{const observations=await statusStore.read();res.json({services:observations});}catch(error){next(error);}});
  const docs=require('./docs');
  app.get('/api/docs',(_req,res)=>res.json(docs.listDocuments()));
  app.get('/api/docs/:id',(req,res)=>{try{res.json(docs.readDocument(req.params.id));}catch{res.status(404).json({error:'Document not found'});}});
