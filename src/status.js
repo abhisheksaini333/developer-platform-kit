@@ -1,6 +1,10 @@
 'use strict';
 const http=require('http'),https=require('https');
-function probe(url,{timeoutMs=1500}={}){
+function validateProbeUrl(value,allowedHosts=['localhost','127.0.0.1','host.docker.internal']){
+ const url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw Error('Only HTTP probes are supported');if(url.username||url.password)throw Error('Probe URLs must not contain credentials');if(!allowedHosts.includes(url.hostname))throw Error('Probe host is not allowed');return url;
+}
+function probe(url,{timeoutMs=1500,allowedHosts}={}){
+ validateProbeUrl(url,allowedHosts);
  return new Promise(resolve=>{
   const start=Date.now();let done=false;
   const finish=(state,detail)=>{if(done)return;done=true;clearTimeout(timer);resolve({state,detail,latencyMs:Date.now()-start,observedAt:new Date().toISOString()});};
@@ -19,4 +23,4 @@ class StatusStore{
  constructor(services,{ttlMs=5000,now=Date.now,...options}={}){this.services=services;this.ttlMs=ttlMs;this.now=now;this.options=options;this.cached=null;this.pending=null;this.updated=0;}
  async read(){if(this.cached&&this.now()-this.updated<this.ttlMs)return this.cached;if(!this.pending)this.pending=probeAll(this.services,this.options).then(values=>{this.cached=values;this.updated=this.now();return values;}).finally(()=>{this.pending=null;});return this.pending;}
 }
-module.exports={probe,probeAll,StatusStore};
+module.exports={probe,probeAll,StatusStore,validateProbeUrl};
