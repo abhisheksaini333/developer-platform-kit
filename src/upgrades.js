@@ -18,4 +18,16 @@ function planUpgrade(dir,overrides={}){
  for(const name of Object.keys(previous.files))if(!(name in next)){const file=managedPath(dir,name);if(fs.existsSync(file)){if(hash(fs.readFileSync(file))!==previous.files[name])conflicts.push(name);else changes.push({path:name,action:'delete'});}}
  return {input,changes,conflicts,files:next};
 }
-module.exports={drift,metadata,managedPath,hash,planUpgrade};
+function applyUpgrade(dir,overrides={}){
+ dir=path.resolve(dir);const plan=planUpgrade(dir,overrides);if(plan.conflicts.length)throw Error('Upgrade conflicts: '+plan.conflicts.join(', '));
+ const parent=path.dirname(dir),staging=fs.mkdtempSync(path.join(parent,'.platform-upgrade-')),backupRoot=fs.mkdtempSync(path.join(parent,'.platform-backup-')),backup=path.join(backupRoot,'original');
+ let moved=false;
+ try{
+  fs.cpSync(dir,staging,{recursive:true,preserveTimestamps:true});
+  for(const change of plan.changes){const file=managedPath(staging,change.path);if(change.action==='delete')fs.unlinkSync(file);else{fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,plan.files[change.path]);}}
+  fs.writeFileSync(path.join(staging,'.platform-template.json'),plan.files['.platform-template.json']);
+  fs.renameSync(dir,backup);moved=true;fs.renameSync(staging,dir);
+  return {backup,changes:plan.changes};
+ }catch(error){if(moved&&!fs.existsSync(dir))fs.renameSync(backup,dir);fs.rmSync(staging,{recursive:true,force:true});throw error;}
+}
+module.exports={drift,metadata,managedPath,hash,planUpgrade,applyUpgrade};
