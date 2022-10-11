@@ -4,4 +4,18 @@ function hash(bytes){return crypto.createHash('sha256').update(bytes).digest('he
 function managedPath(root,name){if(typeof name!=='string'||path.isAbsolute(name)||name.split(/[\\/]/).some(p=>!p||p==='..'||p==='.')||name.includes('\0'))throw Error('Invalid managed path');const file=path.join(root,name);let current=root;for(const part of name.split('/')){current=path.join(current,part);if(fs.existsSync(current)&&fs.lstatSync(current).isSymbolicLink())throw Error('Managed files must not be symlinks');}return file;}
 function metadata(dir){const m=JSON.parse(fs.readFileSync(path.join(dir,'.platform-template.json'),'utf8'));if(!m.files||typeof m.files!=='object'||Array.isArray(m.files)||!m.inputs)throw Error('Invalid template metadata');for(const [name,digest]of Object.entries(m.files)){managedPath(dir,name);if(!/^[a-f0-9]{64}$/.test(digest))throw Error('Invalid managed digest');}return m;}
 function drift(dir){const m=metadata(dir);return Object.entries(m.files).map(([name,digest])=>{const file=managedPath(dir,name);return {path:name,state:!fs.existsSync(file)?'missing':hash(fs.readFileSync(file))===digest?'intact':'modified'};});}
-module.exports={drift,metadata,managedPath,hash};
+function planUpgrade(dir,overrides={}){
+ const previous=metadata(dir),input={...previous.inputs,...overrides},templates=require('./templates');
+ const errors=templates.validateInput(input);if(errors.length)throw Error(errors.join('; '));
+ const next=templates.render(input),changes=[],conflicts=[];
+ for(const [name,content]of Object.entries(next)){
+  if(name==='.platform-template.json')continue;
+  const file=managedPath(dir,name),exists=fs.existsSync(file),actual=exists?hash(fs.readFileSync(file)):null;
+  if(actual===hash(content))continue;
+  if(exists&&actual!==previous.files[name])conflicts.push(name);
+  else changes.push({path:name,action:exists?'update':'create'});
+ }
+ for(const name of Object.keys(previous.files))if(!(name in next)){const file=managedPath(dir,name);if(fs.existsSync(file)){if(hash(fs.readFileSync(file))!==previous.files[name])conflicts.push(name);else changes.push({path:name,action:'delete'});}}
+ return {input,changes,conflicts,files:next};
+}
+module.exports={drift,metadata,managedPath,hash,planUpgrade};
