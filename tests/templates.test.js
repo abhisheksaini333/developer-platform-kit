@@ -54,7 +54,7 @@ exports['CLI rejects invalid input without creating a target'] = () => {
 
 exports['generated projects record template provenance'] = () => {
  const f=require('../src/templates').render({name:'orders',owner:'platform-team',language:'node'});
- const m=JSON.parse(f['.platform-template.json']);assert.strictEqual(m.template,'node');assert.strictEqual(m.version,'1.0.0');assert.strictEqual(m.inputs.name,'orders');
+ const m=JSON.parse(f['.platform-template.json']);assert.strictEqual(m.template,'node');assert.strictEqual(m.version,'1.1.0');assert.strictEqual(m.inputs.name,'orders');
 };
 
 exports['generated service catalog entity carries explicit ownership'] = () => {
