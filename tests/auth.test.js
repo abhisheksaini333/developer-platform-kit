@@ -1,0 +1,2 @@
+const assert=require('assert'),crypto=require('crypto');
+exports['login creates independent PKCE challenges and browser bindings'] = ()=>{const {LoginTransactions}=require('../src/auth');const t=new LoginTransactions(),a=t.begin('/catalog'),b=t.begin('/create');assert.notStrictEqual(a.state,b.state);assert.notStrictEqual(a.binding,b.binding);assert.strictEqual(a.challenge,crypto.createHash('sha256').update(a.verifier).digest('base64url'));assert(a.nonce.length>=32);assert.throws(()=>t.begin('//outside.example'),/return/);};
