@@ -12,5 +12,16 @@ services:
       timeout: 2s
       retries: 30
     volumes: ["catalog-data:/var/lib/postgresql/data"]
+  keycloak:
+    image: quay.io/keycloak/keycloak:17.0.1
+    platform: linux/amd64
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin-local-only
+      JAVA_OPTS_APPEND: -Xms128m -Xmx384m
+    ports: ["127.0.0.1:4610:8080"]
+    volumes: ["./infra/keycloak/realm.json:/opt/keycloak/data/import/platform-realm.json:ro"]
+    mem_limit: 768m
 volumes:
   catalog-data:
