@@ -15,4 +15,15 @@ class LoginTransactions {
   this.entries.set(value.state,value);return {...value,challenge:crypto.createHash('sha256').update(value.verifier).digest('base64url')};
  }
 }
-module.exports={LoginTransactions};
+class TokenVerifier {
+ constructor({issuer,clientId,key}){this.issuer=issuer;this.clientId=clientId;this.key=key||require('jose').createRemoteJWKSet(new URL(issuer+'/protocol/openid-connect/certs'),{timeoutDuration:1500});}
+ async verify(token,nonce){const {payload}=await require('jose').jwtVerify(token,this.key,{issuer:this.issuer,audience:this.clientId,algorithms:['RS256'],clockTolerance:5});if(!payload.sub)throw Error('Missing token subject');if(nonce!==undefined&&payload.nonce!==nonce)throw Error('Invalid token nonce');return payload;}
+}
+function requestJson(url,{method='GET',headers={},body,timeoutMs=2000}={}){
+ return new Promise((resolve,reject)=>{const parsed=new URL(url),transport=parsed.protocol==='https:'?require('https'):require('http');let done=false;
+  const finish=(error,value)=>{if(done)return;done=true;clearTimeout(timer);error?reject(error):resolve(value);};
+  const req=transport.request(parsed,{method,headers},res=>{let chunks=[],size=0;res.on('data',chunk=>{size+=chunk.length;if(size>65536){finish(Error('Identity response too large'));req.destroy();}else chunks.push(chunk);});res.on('end',()=>{if(res.statusCode!==200)return finish(Error('Identity request failed'));try{finish(null,JSON.parse(Buffer.concat(chunks).toString('utf8')));}catch{finish(Error('Invalid identity response'));}});res.on('error',()=>finish(Error('Identity response interrupted')));});
+  const timer=setTimeout(()=>{finish(Error('Identity request timed out'));req.destroy();},timeoutMs);req.on('error',()=>finish(Error('Identity connection failed')));req.end(body);
+ });
+}
+module.exports={LoginTransactions,TokenVerifier,requestJson};
