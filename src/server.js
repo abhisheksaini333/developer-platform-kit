@@ -4,9 +4,11 @@ const {createCatalog}=require('./backstage');
 async function start(port=Number(process.env.PORT||4600),options={}) {
  const app=express();app.disable('x-powered-by');app.use(express.json({limit:'64kb'}));
  app.get('/health',(_req,res)=>res.json({status:'ok'}));
+ const auth=options.auth||require('./auth').createAuth({issuer:process.env.OIDC_ISSUER,baseUrl:process.env.APP_BASE_URL});
+ app.use(require('cookie-parser')());app.use(auth.router);
  const templates=require('./templates'),fs=require('fs');
  const workspace=options.workspace||path.join(__dirname,'../.generated/services');fs.mkdirSync(workspace,{recursive:true});
- app.post('/api/templates/generate',(req,res)=>{const errors=templates.validateInput(req.body);if(errors.length)return res.status(422).json({error:errors.join('; ')});try{const result=templates.generate(req.body,path.join(workspace,req.body.name));res.status(201).json({name:result.name,commands:req.body.language==='dotnet'?['cd '+result.path,'dotnet build','dotnet run']:['cd '+result.path,'npm install','npm test','npm start']});}catch(error){res.status(error.message.includes('exists')?409:422).json({error:error.message});}});
+ app.post('/api/templates/generate',auth.requireDeveloper,(req,res)=>{const errors=templates.validateInput(req.body);if(errors.length)return res.status(422).json({error:errors.join('; ')});try{const result=templates.generate(req.body,path.join(workspace,req.body.name));res.status(201).json({name:result.name,commands:req.body.language==='dotnet'?['cd '+result.path,'dotnet build','dotnet run']:['cd '+result.path,'npm install','npm test','npm start']});}catch(error){res.status(error.message.includes('exists')?409:422).json({error:error.message});}});
  app.post('/api/templates/preview',(req,res)=>{try{res.json(templates.preview(req.body));}catch(error){res.status(422).json({error:error.message});}});
  const status=require('./status');
  const services=options.services||[{name:'sample-service',url:process.env.SERVICE_URL||'http://127.0.0.1:4605/ready'}];
