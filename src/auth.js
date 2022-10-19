@@ -51,6 +51,7 @@ function createAuth({issuer='http://localhost:4610/realms/platform-kit',clientId
    prune();if(sessions.size>=1000)throw Error('Session capacity reached');const sid=random(),expires=Math.min(access.exp*1000,id.exp*1000,now()+1800000);sessions.set(sid,{token:tokens.access_token,expires});res.cookie('platform_session',sid,{...cookie,maxAge:expires-now()});res.redirect(t.returnTo);
   }catch{res.status(401).json({error:'Sign-in could not be verified. Please start again.'});}
  });
+ router.post('/auth/logout',(req,res)=>{if(req.headers.origin!==new URL(baseUrl).origin)return res.status(403).json({error:'Request origin rejected'});sessions.delete(req.cookies?.platform_session);res.clearCookie('platform_session',cookie);res.json({signedOut:true});});
  router.get('/api/session',async(req,res)=>{try{res.json(await identity(req));}catch{res.status(401).json({error:'Sign in required',signIn:'/auth/login'});}});
  async function requireDeveloper(req,res,next){
   try{const user=await identity(req);if(!user.roles.includes('developer'))return res.status(403).json({error:'Developer role required'});if(!req.headers.authorization&&req.headers.origin!==new URL(baseUrl).origin)return res.status(403).json({error:'Request origin rejected'});req.identity=user;next();}
