@@ -22,7 +22,7 @@ class TokenVerifier {
 function requestJson(url,{method='GET',headers={},body,timeoutMs=2000}={}){
  return new Promise((resolve,reject)=>{const parsed=new URL(url),transport=parsed.protocol==='https:'?require('https'):require('http');let done=false;
   const finish=(error,value)=>{if(done)return;done=true;clearTimeout(timer);error?reject(error):resolve(value);};
-  const req=transport.request(parsed,{method,headers},res=>{let chunks=[],size=0;res.on('data',chunk=>{size+=chunk.length;if(size>65536){finish(Error('Identity response too large'));req.destroy();}else chunks.push(chunk);});res.on('end',()=>{if(res.statusCode!==200)return finish(Error('Identity request failed'));try{finish(null,JSON.parse(Buffer.concat(chunks).toString('utf8')));}catch{finish(Error('Invalid identity response'));}});res.on('error',()=>finish(Error('Identity response interrupted')));});
+  const req=transport.request(parsed,{method,headers},res=>{let chunks=[],size=0;res.on('data',chunk=>{size+=chunk.length;if(size>65536){finish(Error('Identity response too large'));req.destroy();}else chunks.push(chunk);});res.on('end',()=>{if(![200,201,204].includes(res.statusCode)){const error=Error('Identity request failed');error.status=res.statusCode;return finish(error);}try{const text=Buffer.concat(chunks).toString('utf8');finish(null,text?JSON.parse(text):null);}catch{finish(Error('Invalid identity response'));}});res.on('error',()=>finish(Error('Identity response interrupted')));});
   const timer=setTimeout(()=>{finish(Error('Identity request timed out'));req.destroy();},timeoutMs);req.on('error',()=>finish(Error('Identity connection failed')));req.end(body);
  });
 }
