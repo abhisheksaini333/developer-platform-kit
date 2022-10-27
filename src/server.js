@@ -19,6 +19,7 @@ async function start(port=Number(process.env.PORT||4600),options={}) {
  app.get('/api/docs/:id',(req,res)=>{try{res.json(docs.readDocument(req.params.id));}catch{res.status(404).json({error:'Document not found'});}});
  let catalog,failed=false;
  const ready=(options.catalogFactory||createCatalog)().then(c=>{catalog=c;}).catch(error=>{failed=true;console.error('Catalog unavailable:',error.message);});
+ app.use('/api/catalog',(req,res,next)=>['GET','HEAD'].includes(req.method)?next():auth.requireDeveloper(req,res,next));
  app.use('/api/catalog',(req,res,next)=>catalog?catalog.router(req,res,next):res.status(503).json({error:failed?'Catalog unavailable':'Catalog is starting'}));
  app.use(express.static(path.join(__dirname,'../dist')));
  app.get('*',(_req,res)=>res.sendFile(path.join(__dirname,'../dist/index.html')));
