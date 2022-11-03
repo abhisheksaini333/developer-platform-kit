@@ -1,0 +1,5 @@
+{
+  "version": "2.3.0",
+  "url": "https://raw.githubusercontent.com/argoproj/argo-cd/v2.3.0/manifests/install.yaml",
+  "sha256": "8093e2f2428eb6aa92d87c1ab19962ebfbc04d4837c90157c5e1cf0d7d95b1b2"
+}
