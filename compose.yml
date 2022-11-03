@@ -19,8 +19,9 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin-local-only
-      JAVA_OPTS_APPEND: -Xms128m -Xmx384m
+      JAVA_OPTS_APPEND: -Xms64m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=48m -XX:TieredStopAtLevel=1
     ports: ["127.0.0.1:4610:8080"]
     mem_limit: 768m
+    cpus: 1.0
 volumes:
   catalog-data:

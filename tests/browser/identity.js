@@ -1,0 +1,15 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const assert=require('assert'),fs=require('fs'),path=require('path');
+const origin=process.env.APP_BASE_URL||'http://localhost:4600';
+const name='browser-node-'+Date.now().toString(36);
+async function login(page,user){await page.goto(origin+'/auth/login?returnTo=/create');await page.locator('#username').fill(user);await page.locator('#password').fill(user+'-local-only');await page.locator('#kc-login').click();await page.waitForURL(origin+'/create',{timeout:45000});}
+(async()=>{const browser=await chromium.launch();const started=Date.now();const findings=[];
+ try{
+  const anonymous=await browser.newContext();const denied=await anonymous.request.post(origin+'/api/templates/generate',{data:{name:'unauthorized',owner:'platform-team',language:'node'}});assert.strictEqual(denied.status(),401);findings.push('anonymous generation rejected');await anonymous.close();
+  const dev=await browser.newContext();const page=await dev.newPage();await login(page,'developer');await page.getByLabel('Service name').fill(name);await page.getByRole('button',{name:'Preview service'}).click();await page.getByRole('button',{name:'Create service',exact:true}).click();await page.getByText(name+' is ready to develop',{exact:true}).waitFor();findings.push('developer browser login and service generation');
+  const identity=await page.evaluate(()=>fetch('/api/session').then(r=>r.json()));assert(identity.roles.includes('developer'));const cookies=await dev.cookies();const session=cookies.find(c=>c.name==='platform_session');assert(session.httpOnly);assert.strictEqual(session.sameSite,'Lax');findings.push('verified identity and HttpOnly session');
+  const evidence=path.join(__dirname,'../../.validation');fs.mkdirSync(evidence,{recursive:true});await page.screenshot({path:path.join(evidence,'authenticated-service.png'),fullPage:true});await page.getByRole('button',{name:'Sign out'}).click();await page.getByRole('link',{name:'Sign in to create services →'}).waitFor();assert.strictEqual((await dev.request.get(origin+'/api/session')).status(),401);findings.push('logout removed application access');await dev.close();
+  const viewer=await browser.newContext();const view=await viewer.newPage();await login(view,'viewer');const blocked=await view.evaluate(async()=>{const r=await fetch('/api/templates/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'viewer-forbidden',owner:'platform-team',language:'node'})});return r.status;});assert.strictEqual(blocked,403);findings.push('viewer browser login cannot generate');await viewer.close();
+  fs.writeFileSync(path.join(evidence,'identity.json'),JSON.stringify({checks:findings,elapsedMs:Date.now()-started},null,2)+'\n');console.log(JSON.stringify({checks:findings,elapsedMs:Date.now()-started}));
+ }finally{await browser.close();fs.rmSync(path.join(__dirname,'../../.generated/services',name),{recursive:true,force:true});}
+})().catch(e=>{console.error(e);process.exitCode=1;});
