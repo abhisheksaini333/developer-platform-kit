@@ -5,15 +5,39 @@ metadata:
   labels: {app: __NAME__, platform-kit/owner: __OWNER__}
 spec:
   replicas: 1
+  progressDeadlineSeconds: 45
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: {maxSurge: 1, maxUnavailable: 0}
   selector:
     matchLabels: {app: __NAME__}
   template:
     metadata:
       labels: {app: __NAME__}
     spec:
+      terminationGracePeriodSeconds: 15
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
         - name: service
           image: __NAME__:1.0.0
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests: {cpu: 20m, memory: 32Mi}
+            limits: {cpu: 500m, memory: 128Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            initialDelaySeconds: 2
+            periodSeconds: 3
+          livenessProbe:
+            httpGet: {path: /health, port: http}
+            initialDelaySeconds: 10
+            periodSeconds: 10
           ports:
             - {name: http, containerPort: __PORT__}
 ---

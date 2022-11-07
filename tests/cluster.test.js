@@ -4,3 +4,5 @@ exports['cluster configuration isolates published ports and kubeconfig']=()=>{
  assert.strictEqual(config.nodes.length,1);assert.strictEqual(config.nodes[0].extraPortMappings[0].listenAddress,'127.0.0.1');assert.strictEqual(config.nodes[0].extraPortMappings[0].hostPort,4625);
  const c=require('../scripts/lib/cluster');assert(c.kubeconfig.startsWith(path.join(root,'.runtime')));assert.strictEqual(c.name,'platform-kit-2022');
 };
+
+exports['generated workloads define safe probes and bounded rolling updates']=()=>{for(const language of ['node','dotnet']){const docs=require('yaml').parseAllDocuments(require('../src/templates').render({name:'test-service',owner:'platform-team',language})['k8s/deployment.yaml']).map(x=>x.toJSON());const d=docs[0],c=d.spec.template.spec.containers[0];assert.strictEqual(c.readinessProbe.httpGet.path,'/ready');assert.strictEqual(c.livenessProbe.httpGet.path,'/health');assert.strictEqual(d.spec.strategy.rollingUpdate.maxUnavailable,0);assert.strictEqual(c.securityContext.allowPrivilegeEscalation,false);assert.strictEqual(c.resources.limits.memory,'128Mi');}};
