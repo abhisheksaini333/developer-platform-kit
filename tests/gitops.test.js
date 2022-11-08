@@ -1,3 +1,5 @@
 const assert=require('assert'),fs=require('fs'),path=require('path'),os=require('os');
 const {seed,git,manifests}=require('../src/gitops');
 exports['GitOps seed creates a real local bare repository and bounded project']=()=>{const dir=fs.mkdtempSync(path.join(os.tmpdir(),'gitops-'));try{const s=seed(dir);assert.strictEqual(git(s.bare,['rev-parse','main']),s.revision);assert(fs.existsSync(path.join(s.bare,'info/refs')));assert.throws(()=>seed(dir),/already exists/);const [project,app]=manifests('http://example.invalid/repo.git');assert.deepStrictEqual(project.spec.clusterResourceWhitelist,[]);assert.strictEqual(project.spec.destinations[0].namespace,'platform-demo');assert.strictEqual(app.spec.source.path,'k8s');assert(!app.spec.syncPolicy);}finally{fs.rmSync(dir,{recursive:true,force:true});}};
+
+exports['deployment commands reject branch names and shell content as revisions']=()=>{const {sync}=require('../scripts/deploy');assert.throws(()=>sync('main'),/full Git commit/);assert.throws(()=>sync('abc; touch /tmp/bad'),/full Git commit/);};
