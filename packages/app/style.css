@@ -22,3 +22,5 @@ main {min-width:0;}
 .status-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;margin-top:32px}.status-card{border:1px solid #d1dbcf;background:white;padding:26px}.status-card h2{font-size:22px}.state{font:11px "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:1px;padding:5px 8px;background:#f2e8d5;color:#795014}.state.ready{background:#e2f0c6;color:#345119}.state.unhealthy{background:#ffe0d8;color:#852920}.status-card small{color:#65766b}
 
 .identity{margin-top:38px;font-size:13px;display:grid;gap:8px}.identity a{color:#d1ef77;line-height:1.6}.identity small{color:#a3b6a8}.identity button{background:transparent;color:#edf5df;border:1px solid #667e70;padding:8px;cursor:pointer;text-align:left}.identity button:focus{outline:2px solid #d1ef77}
+
+.deployment-card{margin-top:32px;border-top:1px solid #d8e1df;padding:28px 0}.deployment-card table{width:100%;text-align:left;border-collapse:collapse;margin:20px 0}.deployment-card th,.deployment-card td{border-bottom:1px solid #d8e1df;padding:12px}.deployment-card caption{text-align:left;font-weight:600;padding:10px 0}
