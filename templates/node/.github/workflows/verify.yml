@@ -12,7 +12,3 @@ jobs:
           node-version: '16.13.1'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm test
-      - uses: actions/upload-artifact@v2
-        with:
-          name: service-build
-          path: dist/
