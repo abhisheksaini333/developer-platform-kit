@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import pathlib,json,urllib.request,hashlib,subprocess
+import pathlib,json,hashlib,subprocess
 root=pathlib.Path(__file__).resolve().parents[1];runtime=root/'.runtime';marker=json.loads((runtime/'cluster-owner.json').read_text())
 if marker!={'name':'platform-kit-2022','root':str(root)}:raise SystemExit('Cluster ownership mismatch')
-lock=json.loads((root/'infra/argocd/install-lock.json').read_text());data=urllib.request.urlopen(lock['url'],timeout=60).read()
+lock=json.loads((root/'infra/argocd/install-lock.json').read_text());data=subprocess.check_output(['curl','--fail','--location','--retry','3','--max-time','120',lock['url']])
 if hashlib.sha256(data).hexdigest()!=lock['sha256']:raise SystemExit('Argo CD manifest checksum mismatch')
 manifest=runtime/'argocd-install.yaml';manifest.write_bytes(data)
 base=[str(root/'.tools/kubectl'),'--kubeconfig',str(runtime/'kubeconfig')]
