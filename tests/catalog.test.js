@@ -1,5 +1,5 @@
 const assert = require('assert');
-const entities = require('../catalog/entities.json');
+const entities = require('yaml').parseAllDocuments(require('fs').readFileSync(require('path').join(__dirname,'../catalog/entities.yaml'),'utf8')).map(d=>d.toJSON());
 exports['catalog services link to a real owning group'] = () => {
  const groups = new Set(entities.filter(e=>e.kind==='Group').map(e=>'group:default/'+e.metadata.name));
  for(const e of entities.filter(e=>e.kind==='Component')) assert(groups.has(e.spec.owner));
@@ -19,3 +19,5 @@ exports['rejects dangling dependencies and dependency cycles'] = () => {
  a[4].spec.dependsOn=['component:default/missing'];
  assert(validateCatalog(a).some(e=>e.includes('Unknown dependency')));
 };
+
+exports['catalog validation reports malformed records without crashing']=()=>{const {validateCatalog}=require('../src/catalog');assert(validateCatalog([null,{}, {kind:'Component',metadata:{name:'bad'},spec:{dependsOn:'not-an-array'}}]).length);};

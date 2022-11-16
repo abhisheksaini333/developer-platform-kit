@@ -4,6 +4,9 @@ const NAME = /^[a-z][a-z0-9-]{0,62}$/;
 function entityRef(e) { return `${String(e.kind).toLowerCase()}:default/${e.metadata.name}`; }
 function validateCatalog(entities) {
   const errors = [], refs = new Set();
+  if(!Array.isArray(entities))return ['Catalog must contain an entity array'];
+  entities=entities.filter(e=>{if(!e||!e.metadata||!e.kind){errors.push('Entity requires kind and metadata');return false;}return true;});
+  for(const e of entities)if(e.spec&&e.spec.dependsOn!==undefined&&!Array.isArray(e.spec.dependsOn))errors.push('Dependencies must be an array');
   for (const e of entities) {
     const name = e.metadata && e.metadata.name;
     if (!NAME.test(name || '')) errors.push('Invalid entity name');
@@ -16,7 +19,7 @@ function validateCatalog(entities) {
     }
   }
   for (const e of entities) if (e.spec && e.spec.owner && !refs.has(e.spec.owner)) errors.push(`${e.metadata.name}: unknown owner ${e.spec.owner}`);
-  const graph = new Map(entities.map(e=>[entityRef(e), (e.spec && e.spec.dependsOn) || []]));
+  const graph = new Map(entities.map(e=>[entityRef(e), (Array.isArray(e.spec?.dependsOn)?e.spec.dependsOn:[])]));
   const visited = new Set(), active = new Set();
   function visit(ref) {
     if(active.has(ref)) { errors.push(`Dependency cycle at ${ref}`); return; }

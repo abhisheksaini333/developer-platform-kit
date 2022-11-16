@@ -5,6 +5,8 @@ const {DatabaseManager,UrlReaders,getRootLogger,SingleHostDiscovery}=require('@b
 const {PermissionClient}=require('@backstage/plugin-permission-common');
 const {CatalogBuilder}=require('@backstage/plugin-catalog-backend');
 async function createCatalog() {
+ const entities=require('yaml').parseAllDocuments(require('fs').readFileSync(path.join(__dirname,'../catalog/entities.yaml'),'utf8')).map(d=>d.toJSON());
+ const errors=require('./catalog').validateCatalog(entities);if(errors.length)throw Error('Invalid catalog: '+errors.join('; '));
  const logger=getRootLogger();
  const config=new ConfigReader({
   app:{baseUrl:'http://localhost:4600'},
