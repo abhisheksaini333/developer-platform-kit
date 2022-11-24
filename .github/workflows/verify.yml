@@ -1,0 +1,20 @@
+name: Verify platform
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  platform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.16.0'
+      - run: npm ci --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - run: node node_modules/esbuild/install.js
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - run: node scripts/check-generated.js
+      - run: docker build -t platform-dotnet-smoke -f infra/dotnet-smoke.Dockerfile .
+      - run: docker run --rm platform-dotnet-smoke
