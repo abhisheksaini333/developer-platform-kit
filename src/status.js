@@ -21,6 +21,6 @@ async function probeAll(services,{concurrency=4,...options}={}){
 }
 class StatusStore{
  constructor(services,{ttlMs=5000,now=Date.now,...options}={}){this.services=services;this.ttlMs=ttlMs;this.now=now;this.options=options;this.cached=null;this.pending=null;this.updated=0;}
- async read(){if(this.cached&&this.now()-this.updated<this.ttlMs)return this.cached;if(!this.pending)this.pending=probeAll(this.services,this.options).then(values=>{this.cached=values;this.updated=this.now();return values;}).finally(()=>{this.pending=null;});return this.pending;}
+ async read(){if(this.cached&&this.now()-this.updated<this.ttlMs)return this.cached.map(x=>({...x}));if(!this.pending)this.pending=probeAll(this.services,this.options).then(values=>{this.cached=values;this.updated=this.now();return values;}).finally(()=>{this.pending=null;});return (await this.pending).map(x=>({...x}));}
 }
 module.exports={probe,probeAll,StatusStore,validateProbeUrl};
