@@ -28,6 +28,6 @@ function applyUpgrade(dir,overrides={}){
   fs.writeFileSync(path.join(staging,'.platform-template.json'),plan.files['.platform-template.json']);
   fs.renameSync(dir,backup);moved=true;fs.renameSync(staging,dir);
   return {backup,changes:plan.changes};
- }catch(error){if(moved&&!fs.existsSync(dir))fs.renameSync(backup,dir);fs.rmSync(staging,{recursive:true,force:true});throw error;}
+ }catch(error){if(moved&&!fs.existsSync(dir))fs.renameSync(backup,dir);fs.rmSync(staging,{recursive:true,force:true});if(!fs.existsSync(backup))fs.rmSync(backupRoot,{recursive:true,force:true});throw error;}
 }
 module.exports={drift,metadata,managedPath,hash,planUpgrade,applyUpgrade};
