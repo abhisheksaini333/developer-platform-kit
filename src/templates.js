@@ -31,12 +31,15 @@ function generate(input, destination) {
  let ancestor=path.dirname(target);while(ancestor!==path.dirname(ancestor)){if(fs.lstatSync(ancestor).isSymbolicLink() && !['/var','/tmp','/etc'].includes(ancestor))throw new Error('Destination must not contain a symlink');ancestor=path.dirname(ancestor);}
  if(fs.existsSync(target)) throw new Error('Destination already exists');
  const staging=fs.mkdtempSync(path.join(path.dirname(target), '.platform-'));
+ let reserved=false;
  try {
   for(const [name,content] of Object.entries(render(input))) {
    const file=path.join(staging,name); fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,content);
   }
-  fs.renameSync(staging,target);
- } catch(error) { fs.rmSync(staging,{recursive:true,force:true}); throw error; }
+  fs.mkdirSync(target);reserved=true;
+  for(const name of fs.readdirSync(staging))fs.renameSync(path.join(staging,name),path.join(target,name));
+  fs.rmdirSync(staging);
+ } catch(error) { if(reserved)fs.rmSync(target,{recursive:true,force:true});fs.rmSync(staging,{recursive:true,force:true}); throw error; }
  return {name:input.name,path:target};
 }
 function preview(input) {const errors=validateInput(input);if(errors.length) throw new Error(errors.join('; '));const files=render(input);return {name:input.name,language:input.language,files:Object.keys(files).sort(),bytes:Object.values(files).reduce((n,x)=>n+Buffer.byteLength(x),0)};}
