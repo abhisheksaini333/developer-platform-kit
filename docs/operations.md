@@ -12,7 +12,7 @@ node scripts/cluster.js load
 node scripts/gitops.js serve
 ```
 
-Keep the read-only Git server running. It exposes only the generated public demo repository on port 4615, allowing the cluster to fetch `host.docker.internal`. In another terminal:
+Keep the read-only Git server running. It serves only the generated public demo repository from a non-root, read-only 64 MiB container on the kind network. The cluster fetches `platform-kit-git-source:4615`; no host port is exposed and Docker Desktop host-loopback forwarding is unnecessary. In another terminal:
 
 ```sh
 node scripts/gitops.js register
