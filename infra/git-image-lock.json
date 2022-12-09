@@ -1,0 +1,5 @@
+{
+  "image": "alpine/git:v2.32.0@sha256:a8a31155488a93a4d8abb834777c7b5f9d7c93db6051defbad8cc066b4e90072",
+  "actualGitVersion": "2.34.1",
+  "imageCreated": "2022-03-20T05:12:43.391190551Z"
+}
