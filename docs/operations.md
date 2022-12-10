@@ -9,10 +9,11 @@ python3 scripts/install-argocd.py
 node scripts/gitops.js seed
 docker build -t platform-kit-node:demo .runtime/gitops-work
 node scripts/cluster.js load
+node scripts/gitops.js build-source
 node scripts/gitops.js serve
 ```
 
-Keep the read-only Git server running. It serves only the generated public demo repository from a non-root, read-only 64 MiB container on the kind network. The digest-pinned image contains Git 2.34.1 and serves the smart Git protocol with receive-pack disabled. The cluster fetches `git://platform-kit-git-source:4615/platform-demo.git`; no host port is exposed and Docker Desktop host-loopback forwarding is unnecessary. In another terminal:
+Keep the read-only Git server running. It serves only the generated public demo repository from a non-root, read-only 64 MiB container on the kind network. The digest-pinned image contains Git 2.34.1 and serves smart HTTP using upload-pack only. The cluster fetches `http://platform-kit-git-source:4615/platform-demo.git`; no host port is exposed and Docker Desktop host-loopback forwarding is unnecessary. In another terminal:
 
 ```sh
 node scripts/gitops.js register
