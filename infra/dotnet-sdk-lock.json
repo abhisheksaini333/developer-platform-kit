@@ -1,0 +1,22 @@
+{
+  "version": "6.0.201",
+  "releaseDate": "2022-03-08",
+  "artifacts": {
+    "linux-arm64": {
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.201/dotnet-sdk-6.0.201-linux-arm64.tar.gz",
+      "sha512": "2ea443c27ab7ca9d566e4df0e842063642394fd22fe2a8620371171c8207ae6a4a72c8c54fc6af5b6b053be25cf9c09a74504f08b963e5bd84544619aed9afc2"
+    },
+    "linux-x64": {
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.201/dotnet-sdk-6.0.201-linux-x64.tar.gz",
+      "sha512": "a4d96b6ca2abb7d71cc2c64282f9bd07cedc52c03d8d6668346ae0cd33a9a670d7185ab0037c8f0ecd6c212141038ed9ea9b19a188d1df2aae10b2683ce818ce"
+    },
+    "osx-arm64": {
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.201/dotnet-sdk-6.0.201-osx-arm64.tar.gz",
+      "sha512": "0796a81339788fbc160885548983889dcffd26a5c0ac935b497b290ae99920386f3929cebfbef9bb22f644a207ba329cf8b90ffe7bbb49d1d99d0d8a05ce50c9"
+    },
+    "osx-x64": {
+      "url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/6.0.201/dotnet-sdk-6.0.201-osx-x64.tar.gz",
+      "sha512": "1df27ca5a1db1a8712acd95083aa00ec7b266618770e164d6460d0cf781b3643a7365ef35232140c83b588f7aa4e2d7e5f5b6d627f1851b2d0ec197172f9fb4d"
+    }
+  }
+}

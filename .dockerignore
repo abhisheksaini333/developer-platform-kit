@@ -1,0 +1,9 @@
+node_modules
+.tools
+.runtime
+.validation
+.generated
+.git
+dist
+**/bin
+**/obj
