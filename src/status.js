@@ -8,7 +8,7 @@ function probe(url,{timeoutMs=1500,allowedHosts}={}){
  return new Promise(resolve=>{
   const start=Date.now();let done=false;
   const finish=(state,detail)=>{if(done)return;done=true;clearTimeout(timer);resolve({state,detail,latencyMs:Date.now()-start,observedAt:new Date().toISOString()});};
-  const req=(url.startsWith('https:')?https:http).get(url,res=>{let text='',size=0;res.on('data',c=>{size+=c.length;if(size>65536){finish('unhealthy','Health response exceeds 64 KiB');req.destroy();return;}text+=c;});res.on('end',()=>{if(res.statusCode!==200)return finish('unhealthy',`HTTP ${res.statusCode}`);try{const data=JSON.parse(text);finish(['ok','ready'].includes(data.status)?'ready':'unhealthy',data.status||'Unexpected health response');}catch{finish('unhealthy','Invalid health response');}});res.on('error',()=>finish('unavailable','Connection closed'));});
+  const req=(url.startsWith('https:')?https:http).get(url,res=>{let text='',size=0;res.on('data',c=>{size+=c.length;if(size>65536){finish('unhealthy','Health response exceeds 64 KiB');req.destroy();return;}text+=c;});res.on('end',()=>{if(res.statusCode!==200)return finish('unhealthy',`HTTP ${res.statusCode}`);try{const data=JSON.parse(text);finish(['ok','ready'].includes(data.status)?'ready':'unhealthy',typeof data.status==='string'?data.status.slice(0,256):'Unexpected health response');}catch{finish('unhealthy','Invalid health response');}});res.on('error',()=>finish('unavailable','Connection closed'));});
   const timer=setTimeout(()=>{finish('unavailable','Probe deadline exceeded');req.destroy();},timeoutMs);
   req.on('error',()=>finish('unavailable','Connection failed'));
  });
