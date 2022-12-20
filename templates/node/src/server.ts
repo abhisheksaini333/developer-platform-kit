@@ -14,13 +14,14 @@ export function createServer() {
   if(req.url==='/items' && req.method==='GET') {res.end(JSON.stringify(items));return;}
   if(req.url==='/items' && req.method==='POST') {
    if(!String(req.headers['content-type']||'').toLowerCase().startsWith('application/json')) {res.statusCode=415;res.end(JSON.stringify({error:'Use application/json'}));return;}
-   let body='';for await(const chunk of req) {body+=chunk;if(Buffer.byteLength(body)>65536){res.statusCode=413;res.end(JSON.stringify({error:'Body exceeds 64 KiB'}));return;}}
+   let body='';try{for await(const chunk of req) {body+=chunk;if(Buffer.byteLength(body)>65536){res.statusCode=413;res.end(JSON.stringify({error:'Body exceeds 64 KiB'}));return;}}}catch{if(!res.destroyed){res.statusCode=400;res.end(JSON.stringify({error:'Request body interrupted'}));}return;}
    let value;try {value=JSON.parse(body);}catch {res.statusCode=400;res.end(JSON.stringify({error:'Invalid JSON'}));return;}
    const error=validateItem(value);if(error) {res.statusCode=422;res.end(JSON.stringify({error}));return;}
    const item={id:items.length+1,title:value.title.trim()};items.push(item);res.statusCode=201;res.end(JSON.stringify(item));return;
   }
   res.statusCode=404;res.end(JSON.stringify({error:'Not found'}));
  });
+ server.requestTimeout=10000;server.headersTimeout=10000;
  (server as any).drain=()=>{draining=true;};return server;
 }
 if(require.main===module) {
