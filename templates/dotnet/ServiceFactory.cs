@@ -15,6 +15,33 @@ public static class ServiceFactory
             using var scope = app.Logger.BeginScope(new Dictionary<string, object> { ["RequestId"] = id });
             await next();
         });
+        app.Use(async (context, next) => {
+            if (context.Request.Method is not ("POST" or "PUT" or "PATCH")) { await next(); return; }
+            var original = context.Request.Body;
+            using var bounded = new MemoryStream();
+            try {
+                var chunk = new byte[8192];
+                int count;
+                while ((count = await original.ReadAsync(chunk, context.RequestAborted)) > 0) {
+                    if (bounded.Length + count > 65536) {
+                        context.Response.StatusCode = 413;
+                        context.Response.Headers["Connection"] = "close";
+                        await context.Response.WriteAsJsonAsync(new { error = "Body exceeds 64 KiB" });
+                        return;
+                    }
+                    bounded.Write(chunk, 0, count);
+                }
+                bounded.Position = 0;
+                context.Request.Body = bounded;
+                await next();
+            }
+            catch (BadHttpRequestException error) when (error.StatusCode == 413) {
+                context.Response.StatusCode = 413;
+                        context.Response.Headers["Connection"] = "close";
+                await context.Response.WriteAsJsonAsync(new { error = "Body exceeds 64 KiB" });
+            }
+            finally { context.Request.Body = original; }
+        });
         app.MapGet("/", () => Results.Json(new { service = "__NAME__" }));
         app.MapGet("/health", () => Results.Json(new { status = "ok", service = "__NAME__" }));
         app.MapGet("/ready", () => Environment.GetEnvironmentVariable("READY") == "false" ? Results.Json(new { status = "unavailable" }, statusCode: 503) : Results.Json(new { status = "ready" }));

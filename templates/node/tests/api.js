@@ -23,6 +23,9 @@ server.listen(0,'127.0.0.1',async()=>{
   const correlated=await request(port,'/health','GET',undefined,{'X-Request-Id':'request-42'});assert.strictEqual(correlated.headers['x-request-id'],'request-42');
   await new Promise(resolve=>{const socket=require('net').connect(port,'127.0.0.1',()=>{socket.write('POST /items HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: 1000\r\n\r\n{"title":"unfinished');setTimeout(()=>socket.destroy(),20);});socket.on('error',()=>{});socket.on('close',resolve);});
   await new Promise(resolve=>setTimeout(resolve,40));assert.strictEqual((await request(port,'/health')).status,200);
+  const concurrent=await Promise.all(Array.from({length:12},(_,i)=>request(port,'/items','POST',{title:'Concurrent '+i})));assert(concurrent.every(r=>r.status===201));assert.strictEqual(new Set(concurrent.map(r=>r.body.id)).size,12);
+  assert.strictEqual((await request(port,'/items','POST','plain',{'Content-Type':'text/plain'})).status,415);
+  process.env.READY='false';assert.strictEqual((await request(port,'/ready')).status,503);assert.strictEqual((await request(port,'/health')).status,200);delete process.env.READY;
   console.log('Generated service API checks passed');
  } catch(error) {console.error(error);process.exitCode=1;}finally{server.close();}
 });

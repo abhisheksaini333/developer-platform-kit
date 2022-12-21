@@ -21,6 +21,16 @@ try
     using var correlated = new HttpRequestMessage(HttpMethod.Get, "/health");
     correlated.Headers.Add("X-Request-Id", "request-42");
     Check((await client.SendAsync(correlated)).Headers.GetValues("X-Request-Id").Single() == "request-42", "Correlation ID");
-    Console.WriteLine("8 actual ASP.NET HTTP assertions passed");
+    var concurrent = await Task.WhenAll(Enumerable.Range(0, 12).Select(i => client.PostAsJsonAsync("/items", new { title = "Concurrent " + i })));
+    Check(concurrent.All(r => r.StatusCode == HttpStatusCode.Created), "Concurrent creation status");
+    var created = await Task.WhenAll(concurrent.Select(r => r.Content.ReadFromJsonAsync<WorkItem>()));
+    Check(created.Select(item => item!.Id).Distinct().Count() == 12, "Concurrent IDs are unique");
+    Check((int)(await client.PostAsync("/items", new StringContent("{broken", System.Text.Encoding.UTF8, "application/json"))).StatusCode == 400, "Malformed JSON");
+    Check((int)(await client.PostAsJsonAsync("/items", new { title = new string('x', 70000) })).StatusCode == 413, "Bounded request body");
+    Check((int)(await client.PostAsync("/items", new StringContent("plain"))).StatusCode == 415, "Unsupported content type");
+    Environment.SetEnvironmentVariable("READY", "false");
+    try { Check((int)(await client.GetAsync("/ready")).StatusCode == 503, "Unavailable readiness"); Check((await client.GetAsync("/health")).StatusCode == HttpStatusCode.OK, "Liveness during dependency failure"); }
+    finally { Environment.SetEnvironmentVariable("READY", null); }
+    Console.WriteLine("ASP.NET HTTP acceptance passed: health, readiness, validation, OpenAPI, correlation and concurrency");
 }
 finally { await app.StopAsync(); await app.DisposeAsync(); }
