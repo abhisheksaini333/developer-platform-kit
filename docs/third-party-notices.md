@@ -1,6 +1,6 @@
 # Third-party components
 
-Original platform code is Apache-2.0, under the repository's LICENSE. Dependencies and container contents retain their upstream terms. No upstream repository history is copied into this project.
+Original platform code is Apache-2.0, under the repository's LICENSE. Dependencies and container contents retain their upstream terms.
 
 | Component | Upstream license/source |
 | --- | --- |

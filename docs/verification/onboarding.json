@@ -1,0 +1,38 @@
+{
+  "node": "v16.16.0",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "stages": [
+    {
+      "stage": "install",
+      "elapsedMs": 11020.312166,
+      "passed": true
+    },
+    {
+      "stage": "esbuild",
+      "elapsedMs": 72.366709,
+      "passed": true
+    },
+    {
+      "stage": "unit",
+      "elapsedMs": 2652.369083,
+      "passed": true
+    },
+    {
+      "stage": "typecheck",
+      "elapsedMs": 2901.31575,
+      "passed": true
+    },
+    {
+      "stage": "build",
+      "elapsedMs": 936.374208,
+      "passed": true
+    },
+    {
+      "stage": "services",
+      "elapsedMs": 12603.019541,
+      "passed": true
+    }
+  ],
+  "totalMs": 30185.757457
+}

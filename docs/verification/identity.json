@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "anonymous generation rejected",
+    "developer browser login and service generation",
+    "verified identity and HttpOnly session",
+    "logout removed application access",
+    "viewer browser login cannot generate"
+  ],
+  "elapsedMs": 5116
+}

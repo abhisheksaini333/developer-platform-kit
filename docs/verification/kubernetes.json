@@ -1,0 +1,56 @@
+{
+  "checks": [
+    "generated Node API runs in actual Kubernetes",
+    "manual replica drift detected and reconciled from Git",
+    "bad rollout failed and previous healthy replica served requests",
+    "known revision rollback and Git revert both recovered"
+  ],
+  "revisions": {
+    "baseline": "8b3baced8bd7b51b3bb2f9d8dcbaaf88728ce424",
+    "failed": "2c28958a824282d4390178a879cf44e6dcd3e5d7",
+    "recovered": "1e72e30cee3de192ffe1a8e00c190ca9b3eb75cf"
+  },
+  "stages": [
+    {
+      "name": "deploy generated service through Argo CD",
+      "elapsedMs": 1829
+    },
+    {
+      "name": "detect and reconcile live replica drift",
+      "elapsedMs": 2127
+    },
+    {
+      "name": "reject an unavailable rollout while preserving the healthy replica",
+      "elapsedMs": 46281
+    },
+    {
+      "name": "roll back a verified revision and restore desired Git state",
+      "elapsedMs": 3867
+    }
+  ],
+  "rolloutFailure": "error: deployment \"platform-demo\" exceeded its progress deadline\n",
+  "application": {
+    "name": "platform-demo",
+    "health": "Healthy",
+    "sync": "Synced",
+    "revision": "1e72e30cee3de192ffe1a8e00c190ca9b3eb75cf",
+    "operation": "Succeeded",
+    "resources": [
+      {
+        "kind": "Service",
+        "name": "platform-demo",
+        "namespace": "platform-demo",
+        "status": "Synced",
+        "health": "Healthy"
+      },
+      {
+        "kind": "Deployment",
+        "name": "platform-demo",
+        "namespace": "platform-demo",
+        "status": "Synced",
+        "health": "Healthy"
+      }
+    ]
+  },
+  "totalMs": 54104
+}
