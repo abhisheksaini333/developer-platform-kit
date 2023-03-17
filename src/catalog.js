@@ -1,6 +1,6 @@
 'use strict';
 const fs = require('fs');
-const NAME = /^[a-z][a-z0-9-]{0,62}$/;
+const NAME = /^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 function entityRef(e) { return `${String(e.kind).toLowerCase()}:default/${e.metadata.name}`; }
 function validateCatalog(entities) {
   const errors = [], refs = new Set();
@@ -9,7 +9,7 @@ function validateCatalog(entities) {
   for(const e of entities)if(e.spec&&e.spec.dependsOn!==undefined&&!Array.isArray(e.spec.dependsOn))errors.push('Dependencies must be an array');
   for (const e of entities) {
     const name = e.metadata && e.metadata.name;
-    if (!NAME.test(name || '')) errors.push('Invalid entity name');
+    if (typeof name !== 'string' || !NAME.test(name)) errors.push('Invalid entity name');
     const ref = `${String(e.kind).toLowerCase()}:default/${name}`;
     if (refs.has(ref)) errors.push(`Duplicate entity ${ref}`);
     refs.add(ref);
