@@ -2,3 +2,5 @@ const assert=require('assert'),fs=require('fs'),os=require('os'),path=require('p
 function project(run){const d=fs.mkdtempSync(path.join(os.tmpdir(),'maint-')),dir=path.join(d,'api');require('../src/templates').generate({name:'orders',owner:'platform-team',language:'node'},dir);try{return run(dir)}finally{fs.rmSync(d,{recursive:true,force:true})}}
 
 exports["maintenance DPK01"]=()=>{const {validateInput}=require('../src/templates');const base={name:'api',owner:'team',language:'node'};for(const value of ['api-', ['api'],{toString:()=> 'api'},'a'.repeat(64)])assert(validateInput({...base,name:value}).length);assert.deepStrictEqual(validateInput({...base,name:'a'.repeat(63)}),[]);assert.deepStrictEqual(validateInput({...base,name:'a'}),[])};
+
+exports["maintenance DPK02"]=()=>{const {validateInput}=require('../src/templates');const base={name:'api',owner:'team',language:'node'};for(const port of [true,[4605],'0x1200','1e3',' 4605 ',0,65536])assert(validateInput({...base,port}).length);for(const port of [1,65535,'4605'])assert.deepStrictEqual(validateInput({...base,port}),[])};

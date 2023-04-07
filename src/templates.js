@@ -9,7 +9,7 @@ function validateInput(input) {
  if(input.format!==undefined && !['text','json'].includes(input.format))errors.push('Format must be text or json');
  if(typeof input.name!=='string'||!NAME.test(input.name)) errors.push('Name must be a lowercase DNS label');
  if(typeof input.owner!=='string'||!NAME.test(input.owner)) errors.push('Owner must be a catalog group name');
- if(input.port!==undefined && (!Number.isInteger(Number(input.port)) || Number(input.port)<1 || Number(input.port)>65535)) errors.push('Port must be an integer from 1 to 65535');
+ if(input.port!==undefined && (!((typeof input.port==='number'&&Number.isInteger(input.port))||(typeof input.port==='string'&&/^[1-9][0-9]*$/.test(input.port))) || Number(input.port)<1 || Number(input.port)>65535)) errors.push('Port must be an integer from 1 to 65535');
  if(!['node','dotnet'].includes(input.language)) errors.push('Language must be node or dotnet');
  return errors;
 }
