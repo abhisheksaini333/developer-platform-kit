@@ -18,7 +18,10 @@ function validateCatalog(entities) {
       if (!e.spec || !['experimental','production','deprecated'].includes(e.spec.lifecycle)) errors.push(`${name}: invalid lifecycle`);
     }
   }
-  for (const e of entities) if (e.spec && e.spec.owner && !refs.has(e.spec.owner)) errors.push(`${e.metadata.name}: unknown owner ${e.spec.owner}`);
+  for (const e of entities) if (e.spec && e.spec.owner) {
+    if(typeof e.spec.owner!=='string'||!e.spec.owner.startsWith('group:')) errors.push(`${e.metadata.name}: owner must reference a Group`);
+    else if(!refs.has(e.spec.owner)) errors.push(`${e.metadata.name}: unknown owner ${e.spec.owner}`);
+  }
   const graph = new Map(entities.map(e=>[entityRef(e), (Array.isArray(e.spec?.dependsOn)?e.spec.dependsOn:[])]));
   const visited = new Set(), active = new Set();
   function visit(ref) {
