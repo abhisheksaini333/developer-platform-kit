@@ -1,7 +1,7 @@
 'use strict';
 const fs = require('fs');
 const NAME = /^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
-function entityRef(e) { return `${String(e.kind).toLowerCase()}:default/${e.metadata.name}`; }
+function entityRef(e) { return `${String(e.kind).toLowerCase()}:${e.metadata.namespace||'default'}/${e.metadata.name}`; }
 function validateCatalog(entities) {
   const errors = [], refs = new Set();
   if(!Array.isArray(entities))return ['Catalog must contain an entity array'];
@@ -10,7 +10,8 @@ function validateCatalog(entities) {
   for (const e of entities) {
     const name = e.metadata && e.metadata.name;
     if (typeof name !== 'string' || !NAME.test(name)) errors.push('Invalid entity name');
-    const ref = `${String(e.kind).toLowerCase()}:default/${name}`;
+    if(e.metadata.namespace!==undefined&&(typeof e.metadata.namespace!=='string'||!NAME.test(e.metadata.namespace))) errors.push('Invalid entity namespace');
+    const ref = entityRef(e);
     if (refs.has(ref)) errors.push(`Duplicate entity ${ref}`);
     refs.add(ref);
     if (e.kind === 'Component') {
