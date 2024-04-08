@@ -23,6 +23,11 @@ function validateCatalog(entities) {
     if(typeof e.spec.owner!=='string'||!e.spec.owner.startsWith('group:')) errors.push(`${e.metadata.name}: owner must reference a Group`);
     else if(!refs.has(e.spec.owner)) errors.push(`${e.metadata.name}: unknown owner ${e.spec.owner}`);
   }
+  for(const e of entities) for(const relation of ['providesApis','consumesApis']) {
+    const targets=e.spec?.[relation];if(targets===undefined)continue;
+    if(!Array.isArray(targets)){errors.push(`${e.metadata.name}: ${relation} must be an array`);continue;}
+    for(const target of targets){const ref=typeof target==='string'&&(target.includes(':')?target:`api:${e.metadata.namespace||'default'}/${target}`);if(!ref||!ref.startsWith('api:')||!refs.has(ref)) errors.push(`${e.metadata.name}: unknown API ${target}`);}
+  }
   const graph = new Map(entities.map(e=>[entityRef(e), (Array.isArray(e.spec?.dependsOn)?e.spec.dependsOn:[])]));
   const visited = new Set(), active = new Set();
   function visit(ref) {
