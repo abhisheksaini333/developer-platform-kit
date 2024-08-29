@@ -6,6 +6,7 @@ function metadata(dir){const file=managedPath(dir,'.platform-template.json');if(
 function drift(dir){const m=metadata(dir);return Object.entries(m.files).map(([name,digest])=>{const file=managedPath(dir,name);return {path:name,state:!fs.existsSync(file)?'missing':hash(fs.readFileSync(file))===digest?'intact':'modified'};});}
 function planUpgrade(dir,overrides={}){
  const previous=metadata(dir),input={...previous.inputs,...overrides},templates=require('./templates');
+ if(input.language!==previous.template)throw Error('Changing template language requires generating a separate service');
  const errors=templates.validateInput(input);if(errors.length)throw Error(errors.join('; '));
  const next=templates.render(input),changes=[],conflicts=[];
  for(const [name,content]of Object.entries(next)){
