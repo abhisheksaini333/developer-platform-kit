@@ -21,6 +21,7 @@ function planUpgrade(dir,overrides={}){
 }
 function applyUpgrade(dir,overrides={}){
  dir=path.resolve(dir);const plan=planUpgrade(dir,overrides);if(plan.conflicts.length)throw Error('Upgrade conflicts: '+plan.conflicts.join(', '));
+ if(!plan.changes.length&&fs.readFileSync(path.join(dir,'.platform-template.json'),'utf8')===plan.files['.platform-template.json'])return {backup:null,changes:[],unchanged:true};
  const parent=path.dirname(dir),staging=fs.mkdtempSync(path.join(parent,'.platform-upgrade-')),backupRoot=fs.mkdtempSync(path.join(parent,'.platform-backup-')),backup=path.join(backupRoot,'original');
  let moved=false;
  try{
