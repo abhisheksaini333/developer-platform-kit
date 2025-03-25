@@ -4,6 +4,7 @@ function validateProbeUrl(value,allowedHosts=['localhost','127.0.0.1','host.dock
  const url=new URL(value);if(!['http:','https:'].includes(url.protocol))throw Error('Only HTTP probes are supported');if(url.username||url.password)throw Error('Probe URLs must not contain credentials');if(!allowedHosts.includes(url.hostname))throw Error('Probe host is not allowed');return url;
 }
 function probe(url,{timeoutMs=1500,allowedHosts}={}){
+ if(!Number.isInteger(timeoutMs)||timeoutMs<1||timeoutMs>60000)throw Error('Invalid probe deadline');
  validateProbeUrl(url,allowedHosts);
  return new Promise(resolve=>{
   const start=Date.now();let done=false;
@@ -20,7 +21,7 @@ async function probeAll(services,{concurrency=4,...options}={}){
  await Promise.all(Array.from({length:Math.min(concurrency,services.length)},worker));return results;
 }
 class StatusStore{
- constructor(services,{ttlMs=5000,now=Date.now,...options}={}){this.services=services;this.ttlMs=ttlMs;this.now=now;this.options=options;this.cached=null;this.pending=null;this.updated=0;}
+ constructor(services,{ttlMs=5000,now=Date.now,...options}={}){if(!Number.isInteger(ttlMs)||ttlMs<0||ttlMs>300000)throw Error('Invalid status cache TTL');this.services=services;this.ttlMs=ttlMs;this.now=now;this.options=options;this.cached=null;this.pending=null;this.updated=0;}
  async read(){if(this.cached&&this.now()-this.updated<this.ttlMs)return this.cached.map(x=>({...x}));if(!this.pending)this.pending=probeAll(this.services,this.options).then(values=>{this.cached=values;this.updated=this.now();return values;}).finally(()=>{this.pending=null;});return (await this.pending).map(x=>({...x}));}
 }
 module.exports={probe,probeAll,StatusStore,validateProbeUrl};
