@@ -4,7 +4,7 @@ const random=()=>crypto.randomBytes(32).toString('base64url');
 class LoginTransactions {
  constructor({now=Date.now,ttlMs=300000,limit=1000}={}){this.now=now;this.ttlMs=ttlMs;this.limit=limit;this.entries=new Map();}
  consume(state,binding){
-  const entry=this.entries.get(state);if(!entry||typeof binding!=='string'||binding.length!==entry.binding.length||!crypto.timingSafeEqual(Buffer.from(binding),Buffer.from(entry.binding)))throw Error('Invalid login state');
+  const entry=this.entries.get(state);if(!entry||typeof binding!=='string'||Buffer.byteLength(binding)!==Buffer.byteLength(entry.binding)||!crypto.timingSafeEqual(Buffer.from(binding),Buffer.from(entry.binding)))throw Error('Invalid login state');
   this.entries.delete(state);if(entry.expires<=this.now())throw Error('Login transaction expired');return entry;
  }
  begin(returnTo='/catalog'){
