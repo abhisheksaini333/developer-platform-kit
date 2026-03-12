@@ -26,3 +26,5 @@ exports["maintenance DPK11"]=async()=>{const http=require('http'),s=http.createS
 exports["maintenance DPK12"]=async()=>{const {probe,StatusStore}=require('../src/status');for(const timeoutMs of [NaN,Infinity,-1,true,60001]){let thrown=false;try{await probe('http://127.0.0.1:1',{timeoutMs})}catch(e){thrown=/deadline/.test(e.message)}assert(thrown)}for(const ttlMs of [NaN,Infinity,-1,true,300001])assert.throws(()=>new StatusStore([],{ttlMs}),/TTL/);assert.deepStrictEqual(await new StatusStore([],{ttlMs:0}).read(),[])};
 
 exports["maintenance DPK14"]=()=>{const {LoginTransactions}=require('../src/auth'),tx=new LoginTransactions(),t=tx.begin();assert.throws(()=>tx.consume(t.state,'é'.repeat(t.binding.length)),/Invalid login state/);assert.equal(tx.consume(t.state,t.binding).state,t.state)};
+
+exports["maintenance DPK15"]=()=>{const tx=new (require('../src/auth').LoginTransactions)();for(const value of ['/%2foutside','/%5coutside','/catalog%0d%0aLocation:x','/%00','/%zz'])assert.throws(()=>tx.begin(value),/Invalid return path/);assert.equal(tx.begin('/catalog?filter=hello%20world').returnTo,'/catalog?filter=hello%20world')};

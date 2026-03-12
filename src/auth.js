@@ -9,6 +9,8 @@ class LoginTransactions {
  }
  begin(returnTo='/catalog'){
   if(typeof returnTo!=='string'||!returnTo.startsWith('/')||returnTo.startsWith('//')||returnTo.includes('\\')||/[\r\n]/.test(returnTo))throw Error('Invalid return path');
+  let decoded;try{decoded=decodeURIComponent(returnTo);}catch{throw Error('Invalid return path');}
+  if(decoded.startsWith('//')||decoded.includes('\\')||/[\x00-\x1f\x7f]/.test(decoded))throw Error('Invalid return path');
   for(const [key,value]of this.entries)if(value.expires<=this.now())this.entries.delete(key);
   if(this.entries.size>=this.limit)throw Error('Too many pending sign-ins');
   const value={state:random(),binding:random(),verifier:random(),nonce:random(),returnTo,expires:this.now()+this.ttlMs};
