@@ -22,6 +22,7 @@ async function start(port=Number(process.env.PORT||4600),options={}) {
  const ready=(options.catalogFactory||createCatalog)().then(c=>{catalog=c;}).catch(error=>{failed=true;console.error('Catalog unavailable:',error.message);});
  app.use('/api/catalog',(req,res,next)=>['GET','HEAD'].includes(req.method)?next():auth.requireDeveloper(req,res,next));
  app.use('/api/catalog',(req,res,next)=>catalog?catalog.router(req,res,next):res.status(503).json({error:failed?'Catalog unavailable':'Catalog is starting'}));
+ app.use('/api',(_req,res)=>res.status(404).json({error:'API resource not found'}));
  app.use(express.static(path.join(__dirname,'../dist')));
  app.get('*',(_req,res)=>res.sendFile(path.join(__dirname,'../dist/index.html')));
  app.use((error,_req,res,_next)=>{console.error(error.message);res.status(error.status||500).json({error:error.status===400?'Invalid JSON':'Platform request failed'});});
