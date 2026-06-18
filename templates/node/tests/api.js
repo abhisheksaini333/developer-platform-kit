@@ -25,6 +25,8 @@ server.listen(0,'127.0.0.1',async()=>{
   await new Promise(resolve=>setTimeout(resolve,40));assert.strictEqual((await request(port,'/health')).status,200);
   const concurrent=await Promise.all(Array.from({length:12},(_,i)=>request(port,'/items','POST',{title:'Concurrent '+i})));assert(concurrent.every(r=>r.status===201));assert.strictEqual(new Set(concurrent.map(r=>r.body.id)).size,12);
   assert.strictEqual((await request(port,'/items','POST','plain',{'Content-Type':'text/plain'})).status,415);
+  assert.strictEqual((await request(port,'/items','POST',{title:'Wrong type'},{'Content-Type':'application/jsonp'})).status,415);
+  assert.strictEqual((await request(port,'/items','POST',{title:'JSON charset'},{'Content-Type':'application/json; charset=utf-8'})).status,201);
   process.env.READY='false';assert.strictEqual((await request(port,'/ready')).status,503);assert.strictEqual((await request(port,'/health')).status,200);delete process.env.READY;
   console.log('Generated service API checks passed');
  } catch(error) {console.error(error);process.exitCode=1;}finally{server.close();}
