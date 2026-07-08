@@ -52,6 +52,9 @@
           },
           "422": {
             "description": "Invalid item"
+          },
+          "503": {
+            "description": "The in-memory item capacity has been reached"
           }
         }
       }

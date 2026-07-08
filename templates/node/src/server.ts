@@ -1,7 +1,8 @@
 import http, { IncomingMessage, ServerResponse } from 'http';
 import {randomUUID} from 'crypto';
 import {Item,validateItem} from './items';
-export function createServer() {
+export function createServer({maxItems=1000}: {maxItems?: number}={}) {
+ if(!Number.isSafeInteger(maxItems)||maxItems<1||maxItems>100000)throw new Error('Item capacity must be between 1 and 100000');
  const items:Item[]=[];let draining=false;
  const server=http.createServer(async (req: IncomingMessage,res: ServerResponse) => {
   const started=process.hrtime.bigint(),requestId=typeof req.headers['x-request-id']==='string' && /^[A-Za-z0-9._-]{1,100}$/.test(req.headers['x-request-id'])?req.headers['x-request-id']:randomUUID();
@@ -17,6 +18,7 @@ export function createServer() {
    let body='';try{for await(const chunk of req) {body+=chunk;if(Buffer.byteLength(body)>65536){res.statusCode=413;res.end(JSON.stringify({error:'Body exceeds 64 KiB'}));return;}}}catch{if(!res.destroyed){res.statusCode=400;res.end(JSON.stringify({error:'Request body interrupted'}));}return;}
    let value;try {value=JSON.parse(body);}catch {res.statusCode=400;res.end(JSON.stringify({error:'Invalid JSON'}));return;}
    const error=validateItem(value);if(error) {res.statusCode=422;res.end(JSON.stringify({error}));return;}
+   if(items.length>=maxItems){res.statusCode=503;res.setHeader('Retry-After','60');res.end(JSON.stringify({error:'Item capacity reached'}));return;}
    const item={id:items.length+1,title:value.title.trim()};items.push(item);res.statusCode=201;res.end(JSON.stringify(item));return;
   }
   res.statusCode=404;res.end(JSON.stringify({error:'Not found'}));
