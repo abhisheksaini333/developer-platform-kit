@@ -26,7 +26,7 @@ async function start(port=Number(process.env.PORT||4600),options={}) {
  app.use(express.static(path.join(__dirname,'../dist')));
  app.get('*',(_req,res)=>res.sendFile(path.join(__dirname,'../dist/index.html')));
  app.use((error,_req,res,_next)=>{console.error(error.message);res.status(error.status||500).json({error:error.status===400?'Invalid JSON':'Platform request failed'});});
- const server=await new Promise(resolve=>{const s=app.listen(port,'127.0.0.1',()=>resolve(s));});
+ let server;try{server=await new Promise((resolve,reject)=>{const s=app.listen(port,'127.0.0.1',()=>{s.removeListener('error',reject);resolve(s);});s.once('error',reject);});}catch(error){await ready;if(catalog)await catalog.stop();throw error;}
  return {app,server,ready,stop:async()=>{await new Promise(resolve=>server.close(resolve));await ready;if(catalog)await catalog.stop();}};
 }
 if(require.main===module) start().then(runtime=>{console.log(`Platform listening on http://localhost:${runtime.server.address().port}`);for(const signal of ['SIGINT','SIGTERM']) process.once(signal,()=>runtime.stop().then(()=>process.exit(0)));}).catch(error=>{console.error(error);process.exitCode=1;});
